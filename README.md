@@ -12,6 +12,16 @@ If you're interested in the philosophy behind why projects like these are
 awesome, you might want to [read my post on the
 subject](http://zachholman.com/2010/08/dotfiles-are-meant-to-be-forked/).
 
+### Matt Notes
+
+- `brew install zsh`
+- `chsh -s $(which zsh)`
+- `brew install coreutils`
+- `brew install fzf`
+- `brew install wget`
+- `sh -c "$(wget -O- https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh --no-check-certificate)"`
+- Change default shell on Hyper
+
 ## topical
 
 Everything's built around topic areas. If you're adding a new area to your
