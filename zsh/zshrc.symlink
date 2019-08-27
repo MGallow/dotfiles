@@ -92,3 +92,18 @@ export TERM='xterm-256color'
 export FZF_COMPLETION_TRIGGER=''
 bindkey '^T' fzf-completion
 bindkey '^I' $fzf_default_completion
+
+# download coreutils - bug fix
+export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
+
+# change theme
+ZSH_THEME="agnoster"
+
+# add plugsins
+plugins=(
+  git 
+  osx 
+  colored-man-pages 
+  zsh-syntax-highlighting
+  zsh-autosuggestions
+)
