@@ -1,4 +1,4 @@
-# holman does dotfiles
+# Galloway does dotfiles
 
 Your dotfiles are how you personalize your system. These are mine.
 
@@ -12,7 +12,7 @@ If you're interested in the philosophy behind why projects like these are
 awesome, you might want to [read my post on the
 subject](http://zachholman.com/2010/08/dotfiles-are-meant-to-be-forked/).
 
-### Matt Notes
+### Notes
 
 - `brew install zsh`
 - `chsh -s $(which zsh)`
@@ -60,7 +60,7 @@ There's a few special files in the hierarchy.
 Run this:
 
 ```sh
-git clone https://github.com/bhillmann/dotfiles.git ~/.dotfiles
+git clone https://github.com/MGallow/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 script/bootstrap
 ```
