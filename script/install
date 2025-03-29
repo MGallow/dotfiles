@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 #
 # Run all dotfiles installers.
 
@@ -6,5 +6,53 @@ set -e
 
 cd "$(dirname $0)"/..
 
-# find the installers and run them iteratively
-find . -name install.sh | while read installer ; do sh -c "${installer}" ; done
+# Install Homebrew dependencies
+echo "› Installing Homebrew dependencies"
+$HOME/.dotfiles/homebrew/install.sh 2>&1
+
+# Install Oh My Zsh if not already installed
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    echo "› Installing Oh My Zsh"
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+
+# Install Zsh plugins
+ZSH_CUSTOM="$HOME/.oh-my-zsh/custom"
+if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
+    echo "› Installing zsh-autosuggestions"
+    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM}/plugins/zsh-autosuggestions
+fi
+
+if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
+    echo "› Installing zsh-syntax-highlighting"
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting
+fi
+
+# Find all install.sh files and run them
+find . -name install.sh -not -path "./script/*" | while read installer ; do
+    echo "› Running ${installer}..."
+    sh -c "${installer}"
+done
+
+# Set macOS defaults
+if [ "$(uname -s)" = "Darwin" ]; then
+    echo "› Setting macOS defaults..."
+    $HOME/.dotfiles/macos/set-defaults.sh
+fi
+
+# Create local config files if they don't exist
+echo "› Creating local config files..."
+touch "$HOME/.zshrc.local"
+touch "$HOME/.gitconfig.local"
+
+# Set up VS Code
+if command -v code >/dev/null; then
+    echo "› Setting up VS Code..."
+    $HOME/.dotfiles/vscode/install.sh
+fi
+
+# Set up Python development environment
+echo "› Setting up Python development environment..."
+$HOME/.dotfiles/python/install.sh
+
+echo "› All installations complete!"

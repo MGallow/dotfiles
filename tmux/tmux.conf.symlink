@@ -1,32 +1,59 @@
-set-option -g default-shell /bin/zsh 
-
-# remap prefix from ‘C-b’ to ‘C-a’
+# Set prefix to Ctrl-Space
 unbind C-b
-set-option -g prefix C-a
-bind-key C-a send-prefix
+set -g prefix C-Space
+bind Space send-prefix
 
+# Use 256 colors
+set -g default-terminal "screen-256color"
+set -ga terminal-overrides ",xterm-256color:Tc"
 
-# split panes using | and -
-bind | split-window -h
-bind - split-window -v
-# unbind ‘“’
-unbind %
+# Start window numbers at 1
+set -g base-index 1
+set-window-option -g pane-base-index 1
 
-# open windows in current path
-bind c new-window
-
-# reload config file (change file location to your the tmux.conf you want to use)
-bind r source-file ~/.tmux.conf
-
-# Enable mouse mode (tmux 2.1 and above)
-#set -g mouse-select-window on
-#set -g mouse-select-pane on
-#set -g mouse-resize-pane on
+# Enable mouse support
 set -g mouse on
 
-# don’t rename windows automatically
+# Increase scrollback buffer size
+set -g history-limit 50000
+
+# Status bar improvements
+set -g status-style 'bg=#333333 fg=#5eacd3'
+set -g status-right '#[fg=yellow]#S #[fg=white]%H:%M#[default]'
+
+# Vim style pane selection
+bind h select-pane -L
+bind j select-pane -D
+bind k select-pane -U
+bind l select-pane -R
+
+# Split panes using | and -
+bind | split-window -h -c "#{pane_current_path}"
+bind - split-window -v -c "#{pane_current_path}"
+unbind '"'
+unbind %
+
+# Reload config file
+bind r source-file ~/.tmux.conf \; display "Reloaded!"
+
+# Fast pane switching
+bind -n M-Left select-pane -L
+bind -n M-Right select-pane -R
+bind -n M-Up select-pane -U
+bind -n M-Down select-pane -D
+
+# Enable vi mode
+set-window-option -g mode-keys vi
+bind-key -T copy-mode-vi 'v' send -X begin-selection
+bind-key -T copy-mode-vi 'y' send -X copy-selection
+
+# don't rename windows automatically
 set-option -g allow-rename off
 
-# panes
-set -g pane-border-fg black
-set -g pane-active-border-fg brightred
+# Smart pane switching with awareness of Vim splits
+is_vim="ps -o state= -o comm= -t '#{pane_tty}' \
+    | grep -iqE '^[^TXZ ]+ +(\\S+\\/)?g?(view|l?n?vim?x?|fzf)(diff)?$'"
+bind-key -n 'C-h' if-shell "$is_vim" 'send-keys C-h'  'select-pane -L'
+bind-key -n 'C-j' if-shell "$is_vim" 'send-keys C-j'  'select-pane -D'
+bind-key -n 'C-k' if-shell "$is_vim" 'send-keys C-k'  'select-pane -U'
+bind-key -n 'C-l' if-shell "$is_vim" 'send-keys C-l'  'select-pane -R'

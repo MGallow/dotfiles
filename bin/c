@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+#
+# c - browse to frequently-used directories
+#
+# This is a shorthand function to quickly navigate to commonly used directories
+# saved in ~/.config/directories
+
+if [ ! -f "$HOME/.config/directories" ]; then
+  mkdir -p "$HOME/.config"
+  touch "$HOME/.config/directories"
+fi
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  echo "Usage: c [directory alias]"
+  echo ""
+  echo "c allows you to quickly navigate to saved directories"
+  echo ""
+  echo "Running c without arguments shows saved directories"
+  echo "Running c [name] changes to that directory"
+  echo "Running c add [name] adds the current directory with that name"
+  echo "Running c remove [name] removes the saved directory"
+  exit 0
+fi
+
+if [ "$1" = "add" ]; then
+  if [ -z "$2" ]; then
+    echo "Please provide a name for this directory"
+    exit 1
+  fi
+  echo "$2=$(pwd)" >> "$HOME/.config/directories"
+  echo "Added $(pwd) as $2"
+  exit 0
+fi
+
+if [ "$1" = "remove" ]; then
+  if [ -z "$2" ]; then
+    echo "Please provide the name to remove"
+    exit 1
+  fi
+  if grep -q "^$2=" "$HOME/.config/directories"; then
+    sed -i '' "/^$2=/d" "$HOME/.config/directories"
+    echo "Removed $2"
+  else
+    echo "No directory saved as $2"
+  fi
+  exit 0
+fi
+
+if [ -z "$1" ]; then
+  echo "Saved directories:"
+  cat "$HOME/.config/directories" | sed 's/=/: /'
+  exit 0
+fi
+
+# Check if the argument exists in the directories file
+dir_path=$(grep "^$1=" "$HOME/.config/directories" | cut -d= -f2)
+
+if [ -z "$dir_path" ]; then
+  echo "No directory saved as $1"
+  exit 1
+fi
+
+cd "$dir_path" || exit 1

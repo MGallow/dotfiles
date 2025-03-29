@@ -1,2 +1,35 @@
-#!/usr/bin/env sh
-ssh "$@" -t zsh
+#!/usr/bin/env bash
+#
+# zssh - SSH wrapper that auto-loads SSH keys
+#
+# Automatically starts the SSH agent and loads all keys in ~/.ssh before connecting
+
+# Function to start ssh-agent if not running
+start_agent() {
+  echo "Starting ssh-agent..."
+  eval "$(ssh-agent -s)"
+  echo "SSH agent started successfully"
+}
+
+# Check for running SSH agent
+if [ -z "$SSH_AUTH_SOCK" ]; then
+  start_agent
+fi
+
+# Add all unloaded keys from ~/.ssh directory
+if [ -d "$HOME/.ssh" ]; then
+  for key in "$HOME"/.ssh/id_*; do
+    # Skip pub keys and non-files
+    if [[ "$key" != *.pub && -f "$key" ]]; then
+      # Check if key is already loaded
+      fingerprint=$(ssh-keygen -lf "$key" | awk '{print $2}')
+      if ! ssh-add -l | grep -q "$fingerprint"; then
+        echo "Adding SSH key: $key"
+        ssh-add "$key"
+      fi
+    fi
+  done
+fi
+
+# Connect using SSH with all arguments passed to this script
+ssh "$@"

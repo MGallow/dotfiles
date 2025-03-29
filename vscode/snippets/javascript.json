@@ -1,0 +1,47 @@
+{
+  "Console Log": {
+    "prefix": "log",
+    "body": [
+      "console.log($1);"
+    ],
+    "description": "Log output to console"
+  },
+  "Function": {
+    "prefix": "fn",
+    "body": [
+      "function ${1:name}(${2:params}) {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Create a function"
+  },
+  "Arrow Function": {
+    "prefix": "af",
+    "body": [
+      "const ${1:name} = (${2:params}) => {",
+      "\t$0",
+      "};"
+    ],
+    "description": "Create an arrow function"
+  },
+  "Import": {
+    "prefix": "imp",
+    "body": [
+      "import ${2:{ $3 }} from '$1';"
+    ],
+    "description": "Import a module"
+  },
+  "Async Function": {
+    "prefix": "afn",
+    "body": [
+      "async function ${1:name}(${2:params}) {",
+      "\ttry {",
+      "\t\t$0",
+      "\t} catch (error) {",
+      "\t\tconsole.error(error);",
+      "\t}",
+      "}"
+    ],
+    "description": "Create an async function with try/catch"
+  }
+}

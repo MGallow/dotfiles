@@ -1,0 +1,32 @@
+[
+  {
+    "key": "cmd+b",
+    "command": "workbench.action.toggleSidebarVisibility"
+  },
+  {
+    "key": "cmd+j",
+    "command": "workbench.action.togglePanel"
+  },
+  {
+    "key": "cmd+k cmd+t",
+    "command": "workbench.action.selectTheme"
+  },
+  {
+    "key": "cmd+k cmd+f",
+    "command": "editor.action.formatDocument",
+    "when": "editorHasDocumentFormattingProvider && editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "cmd+shift+.",
+    "command": "editor.action.quickFix",
+    "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "cmd+\\",
+    "command": "workbench.action.splitEditor"
+  },
+  {
+    "key": "cmd+shift+\\",
+    "command": "workbench.action.splitEditorOrthogonal"
+  }
+]

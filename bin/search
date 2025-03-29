@@ -1,12 +1,31 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
-# Quick search in a directory for a string ($@).
+# search - quickly search for a string in files
 #
-set -e
+# This is a simple wrapper around grep to search for text in files
+# It excludes common binary files and version control folders
 
-# use -iru to search directories ack usually ignores (like .git)
-if [ -x /usr/bin/ack-grep ]; then
-    ack-grep -i "$@"
-else
-    ack -i "$@"
+if [ "$#" -lt 1 ]; then
+  echo "Usage: search [directory] <pattern>"
+  exit 1
 fi
+
+if [ "$#" -eq 1 ]; then
+  # If only one argument, search in current directory
+  PATTERN="$1"
+  DIRECTORY="."
+else
+  # If two or more arguments, last is pattern, everything else is directory
+  PATTERN="${@: -1}"
+  DIRECTORY="${@:1:$#-1}"
+fi
+
+# Run grep with nice formatting
+grep --color=always -r \
+     --exclude-dir=".git" \
+     --exclude-dir="node_modules" \
+     --exclude="*.log" \
+     --exclude="*.min.js" \
+     --exclude="*.min.css" \
+     --exclude="*.map" \
+     -n "$PATTERN" "$DIRECTORY" | less -RFX

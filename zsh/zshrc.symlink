@@ -1,109 +1,65 @@
-# shortcut to this dotfiles path is $ZSH
-export ZSH=$HOME/.dotfiles
+# Path to your dotfiles installation
+export DOTFILES=$HOME/.dotfiles
 
-# Set bindkey
-bindkey -e
+# Path to your oh-my-zsh installation
+export ZSH=$HOME/.oh-my-zsh
 
-setopt extendedglob
+# Theme
+ZSH_THEME="robbyrussell"
 
-# Stash your environment variables in ~/.localrc. This means they'll stay out
-# of your main dotfiles repository (which may be public, like this one), but
-# you'll have access to them in your scripts.
-if [[ -a ~/.localrc ]]
-then
-  source ~/.localrc
+# Plugins
+plugins=(
+  git
+  docker
+  python
+  pip
+  macos
+  vscode
+  node
+  npm
+  history
+  zsh-autosuggestions
+  zsh-syntax-highlighting
+)
+
+# Load Oh My Zsh
+source $ZSH/oh-my-zsh.sh
+
+# User configuration
+export LANG=en_US.UTF-8
+export EDITOR='code-insiders --wait'
+export VISUAL='code-insiders --wait'
+
+# Load all .zsh files from the dotfiles directory
+for config_file ($DOTFILES/**/*.zsh) source $config_file
+
+# Python environment settings
+if [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
+    source "$HOME/miniconda3/etc/profile.d/conda.sh"
 fi
 
-# all of our zsh files
-typeset -U config_files
-config_files=($ZSH/**/*.zsh~*/external*)
+# Node.js settings
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
-# load the path files
-for file in ${(M)config_files:#*/path.zsh}
-do
-  source $file
-done
+# History settings
+HISTSIZE=50000
+SAVEHIST=10000
+setopt extended_history       # record timestamp of command in HISTFILE
+setopt hist_expire_dups_first # delete duplicates first when HISTFILE size exceeds HISTSIZE
+setopt hist_ignore_dups       # ignore duplicated commands history list
+setopt hist_ignore_space      # ignore commands that start with space
+setopt hist_verify           # show command with history expansion to user before running it
+setopt inc_append_history    # add commands to HISTFILE in order of execution
+setopt share_history         # share command history data
 
-# load everything but the path and completion files
-for file in ${${config_files:#*/path.zsh}:#*/completion.zsh}
-do
-  source $file
-done
+# Better directory navigation
+setopt auto_cd              # if command is a path, cd into it
+setopt auto_pushd           # make cd push old dir in dir stack
+setopt pushd_ignore_dups    # no duplicates in dir stack
+setopt pushd_silent         # no dir stack after pushd/popd
+setopt pushd_to_home        # `pushd` = `pushd $HOME`
 
-# load every completion after autocomplete loads
-for file in ${(M)config_files:#*/completion.zsh}
-do
-  source $file
-done
-
-unset config_files
-
-autoload -Uz compinit && compinit
-
-# Prompt Setup
-# Last update 2/21/2018
-# Taken from Stack Overflow
-# http://arjanvandergaag.nl/blog/customize-zsh-prompt-with-vcs-info.html
-setopt prompt_subst
-autoload -Uz vcs_info
-zstyle ':vcs_info:git*' formats "(%b)"
-
-zstyle ':vcs_info:*' enable git cvs svn
-
-# or use precmd, see man zshcontrib
-vcs_info_wrapper() {
-  if [ -n "$vcs_info_msg_0_" ]; then
-    return "%{$fg[grey]%}${vcs_info_msg_0_}%{$reset_color%}$del"
-  fi
-}
-
-precmd() {vcs_info 2> /dev/null}
-
-#RPROMPT=$'$(vcs_info_wrapper)'
-
-PROMPT=$'%{\e]0;%d\a%}\n%F{green}%D{%y.%m.%f} %D{%L:%M:%S}%f %F{242}:%f %F{green}%n@%m:%d%f ${vcs_info_msg_0_}\n'
-
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
-export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-
-bindkey -s "^P" 'nvim +Files;^M'
-bindkey -s "^G" 'nvim +Rg;^M'
-
-tm() {   
-	[[ -n "$TMUX" ]] && change="switch-client" || change="attach-session"
-	if [ $1 ]; then
-		tmux $change -t "$1" 2>/dev/null || (tmux new-session -d -s $1 && tmux $change -t "$1"); return
-	fi   
-	session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --exit-0) &&  tmux $change -t "$session" || echo "No sessions found." 
-}
-
-fzf_log() {
-   hash=$(git log --color=always --format="%C(auto)%h%d %s %C(black)%C(bold)%cr" "$@" |  fzf | awk '{print $1}')
-   echo $hash | xclip
-   git showtool $hash 
-}
-
-export FZF_ALT_C_COMMAND="fd -t d"
-
-export TERM='xterm-256color'
-
-export FZF_COMPLETION_TRIGGER=''
-bindkey '^T' fzf-completion
-bindkey '^I' $fzf_default_completion
-
-# download coreutils - bug fix
-export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
-
-# change theme
-ZSH_THEME="agnoster"
-
-# add plugsins
-plugins=(
-  git 
-  osx 
-  colored-man-pages 
-  zsh-syntax-highlighting
-  zsh-autosuggestions
-)
+# Load local customizations
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local

@@ -1,21 +1,22 @@
-#Load Plugins
-if [[ -s "${ZDOTDIR:-$HOME}/.dotfiles/external/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
-   source "${ZDOTDIR:-$HOME}/.dotfiles/external/zsh-autosuggestions/zsh-autosuggestions.zsh"
-fi
+# ZSH plugin configuration
 
-if [[ -s "${ZDOTDIR:-$HOME}/.dotfiles/external/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
-   source "${ZDOTDIR:-$HOME}/.dotfiles/external/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-fi
+# Define plugins array
+plugins=(
+  git
+  dotenv
+  docker-compose
+  docker
+  tmux
+  python
+  vscode
+  zsh-autosuggestions
+  zsh-syntax-highlighting
+)
 
-if [[ -s "${ZDOTDIR:-$HOME}/.dotfiles/external/zsh-history-substring-search/zsh-history-substring-search.zsh" ]]; then
-   source "${ZDOTDIR:-$HOME}/.dotfiles/external/zsh-history-substring-search/zsh-history-substring-search.zsh"
-   #Vi mode command keys
-   bindkey -M vicmd 'k' history-substring-search-up
-   bindkey -M vicmd 'j' history-substring-search-down
-   # bind UP and DOWN arrow keys
-   zmodload zsh/terminfo
-   bindkey "$terminfo[kcuu1]" history-substring-search-up
-   bindkey "$terminfo[kcud1]" history-substring-search-down
-   bindkey "$terminfo[cuu1]" history-substring-search-up
-   bindkey "$terminfo[cud1]" history-substring-search-down
+# Load Oh My Zsh plugins if they're enabled
+if [ "$ZSH" ]; then
+  # The plugins are already sourced in oh-my-zsh.sh, 
+  # so we don't need to do anything additional here
+  # This file merely defines the plugins array for reference
+  :
 fi

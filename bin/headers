@@ -1,8 +1,17 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
-# https://github.com/rtomayko/dotfiles/blob/rtomayko/bin/headers
+# headers - View HTTP headers of a URL
+#
+# Usage: headers [URL]
+# Displays the HTTP headers of the specified URL
 
-curl -sv "$@" 2>&1 >/dev/null |
-  grep -v "^\*" |
-  grep -v "^}" |
-  cut -c3-
+if [ -z "$1" ]; then
+  echo "Usage: headers [URL]"
+  echo "Example: headers https://github.com"
+  exit 1
+fi
+
+url=$1
+
+# Use curl to get headers
+curl -sSL -D - "$url" -o /dev/null

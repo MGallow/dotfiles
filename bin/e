@@ -1,16 +1,24 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
-# Quick shortcut to an editor.
+# e - opens the specified file in your editor
 #
-# This means that as I travel back and forth between editors, hey, I don't have
-# to re-learn any arcane commands. Neat.
-#
-# USAGE:
-#
-#   $ e
-#   # => opens the current directory in your editor
-#
-#   $ e .
-#   $ e /usr/local
-#   # => opens the specified directory in your editor
-exec "$EDITOR" "${1:-.}"
+# Opens the specified file in your preferred editor
+# If EDITOR is not set, defaults to VS Code Insiders, then VS Code, then vim
+
+if [ -n "$1" ]; then
+  # If an editor is defined in environment, use it
+  if [ -n "$EDITOR" ]; then
+    $EDITOR "$@"
+  # Otherwise try VS Code Insiders
+  elif command -v code-insiders &>/dev/null; then
+    code-insiders "$@"
+  # Then try regular VS Code
+  elif command -v code &>/dev/null; then
+    code "$@"
+  # Fall back to vim
+  else
+    vim "$@"
+  fi
+else
+  echo "Usage: e <file>"
+fi

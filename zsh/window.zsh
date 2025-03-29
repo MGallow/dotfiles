@@ -1,19 +1,27 @@
-# From http://dotfiles.org/~_why/.zshrc
-# Sets the window title nicely no matter where you are
-function title() {
-  # escape '%' chars in $1, make nonprintables visible
-  a=${(V)1//\%/\%\%}
+# ZSH terminal window title configuration
 
-  # Truncate command, and join lines.
-  a=$(print -Pn "%40>...>$a" | tr -d "\n")
+# Set terminal window title based on current directory and running command
+# This helps identify different terminal windows easily
 
-  case $TERM in
-  screen)
-    print -Pn "\ek$a:$3\e\\" # screen title (in ^A")
-    ;;
-  xterm*|rxvt)
-    print -Pn "\e]2;$2\a" # plain xterm title ($3 for pwd)
-    ;;
-  esac
+# Window title function
+function set_window_title() {
+  local TITLE="\033]0;"
+  TITLE+="${USER}@${HOST%%.*}: "
+  TITLE+="${PWD/#$HOME/~}"
+  TITLE+="\007"
+  echo -ne "$TITLE"
 }
 
+# Update title before showing the prompt
+precmd_functions+=(set_window_title)
+
+# Update title before executing a command
+function title_preexec() {
+  local TITLE="\033]0;"
+  TITLE+="${USER}@${HOST%%.*}: "
+  TITLE+="${PWD/#$HOME/~} - $1"
+  TITLE+="\007"
+  echo -ne "$TITLE"
+}
+
+preexec_functions+=(title_preexec)

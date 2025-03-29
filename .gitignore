@@ -1,16 +1,30 @@
-atom.symlink/.apm
-atom.symlink/.node-gyp
-atom.symlink/.storage
-atom.symlink/blob-store
-atom.symlink/compile-cache/
-atom.symlink/packages
-atom.symlink/storage
-atom.symlink/themes
-atom.symlink/blob-store
-atom.symlink/recovery
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
+# Dotfiles specific
 git/gitconfig.local.symlink
-todo/completion.zsh
 
-pure/async
-pure/prompt_pure_setup
+# Common backup files
+*~
+*.bak
+*.swp
+*.old
+
+# Logs
+*.log
+
+# Runtime data
+.env
+.env.local
+
+# Editor directories and files
+.idea
+.vscode
+*.sublime-project
+*.sublime-workspace
