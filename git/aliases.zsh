@@ -53,6 +53,6 @@ gnb() {
     echo "Usage: gnb <branch-name>"
     return 1
   fi
-  
+
   git checkout -b "$1" && git push -u origin "$1"
 }

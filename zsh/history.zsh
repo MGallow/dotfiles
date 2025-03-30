@@ -12,7 +12,7 @@ setopt SHARE_HISTORY
 setopt INC_APPEND_HISTORY
 
 # Expire duplicates first
-setopt HIST_EXPIRE_DUPS_FIRST 
+setopt HIST_EXPIRE_DUPS_FIRST
 
 # Don't store duplications
 setopt HIST_IGNORE_DUPS

@@ -47,28 +47,6 @@ EOF
 echo "Updating conda environment..."
 conda env update -f "$DOTFILES/python/environment.yml"
 
-# Setup pre-commit hooks for Python projects
-if [ ! -f "$DOTFILES/python/pre-commit-config.yaml" ]; then
-    cat > "$DOTFILES/python/pre-commit-config.yaml" << EOF
-repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
-    hooks:
-    -   id: trailing-whitespace
-    -   id: end-of-file-fixer
-    -   id: check-yaml
-    -   id: check-added-large-files
--   repo: https://github.com/psf/black
-    rev: 23.3.0
-    hooks:
-    -   id: black
--   repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
-    hooks:
-    -   id: flake8
-EOF
-fi
-
 # Create default Python configurations
 if [ ! -f "$DOTFILES/python/pyproject.toml" ]; then
     cat > "$DOTFILES/python/pyproject.toml" << EOF
