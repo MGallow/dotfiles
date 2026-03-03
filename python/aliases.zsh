@@ -59,7 +59,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python>=3.9
+  - python>=3.11
   - pip
   - ipython
   - pytest
@@ -77,7 +77,7 @@ pyenv() {
         return 1
     fi
 
-    conda create -n "$1" python=3.9 ipython jupyter black flake8 pytest mypy -y
+    conda create -n "$1" python=3.11 ipython jupyter black flake8 pytest mypy -y
     conda activate "$1"
     echo "Created and activated conda environment: $1"
 }

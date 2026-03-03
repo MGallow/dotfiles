@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 echo "Setting up Python development environment..."
 
@@ -23,7 +23,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python>=3.9
+  - python>=3.11
   - pip
   - ipython
   - jupyter
@@ -38,6 +38,7 @@ dependencies:
   - matplotlib
   - seaborn
   - scikit-learn
+  - ruff
   - pip:
     - pre-commit
     - python-dotenv
@@ -52,7 +53,7 @@ if [ ! -f "$DOTFILES/python/pyproject.toml" ]; then
     cat > "$DOTFILES/python/pyproject.toml" << EOF
 [tool.black]
 line-length = 88
-target-version = ['py39']
+target-version = ['py311']
 include = '\.pyi?$'
 
 [tool.pytest.ini_options]
@@ -61,7 +62,7 @@ testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true

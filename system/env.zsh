@@ -8,14 +8,11 @@ export VISUAL='code-insiders --wait'
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
-# History settings
-export HISTSIZE=10000
-export HISTFILESIZE=10000
-export SAVEHIST=10000
+# History is configured in zsh/history.zsh
 
 # Less configuration
 export LESS="-R"
-export LESS_TERMCAP_md="${yellow}"
+export LESS_TERMCAP_md=$'\e[1;33m'
 
 # Don't clear the screen after quitting a manual page
 export MANPAGER="less -X"

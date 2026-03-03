@@ -1,13 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Check for Homebrew and install if not found
-if test ! $(which brew); then
+if ! command -v brew &> /dev/null; then
   echo "Installing Homebrew..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
   if [[ $(uname -m) == "arm64" ]]; then
     # For Apple Silicon Macs
-    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> $HOME/.zprofile
+    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$HOME/.zprofile"
     eval "$(/opt/homebrew/bin/brew shellenv)"
   fi
 fi

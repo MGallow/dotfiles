@@ -1,10 +1,5 @@
 # Git aliases and functions
 
-# Use `hub` as git wrapper if available
-if (( $+commands[hub] )); then
-  alias git=hub
-fi
-
 # Git shortcuts
 alias gst='git status'
 alias ga='git add'
@@ -14,6 +9,8 @@ alias gc!='git commit -v --amend'
 alias gcn!='git commit -v --no-edit --amend'
 alias gco='git checkout'
 alias gcb='git checkout -b'
+alias gsw='git switch'
+alias gswc='git switch -c'
 alias gb='git branch'
 alias gbd='git branch -d'
 alias gbD='git branch -D'
@@ -31,7 +28,7 @@ alias gcl='git clone'
 alias gclean='git clean -fd'
 alias grm='git rm'
 alias grmc='git rm --cached'
-alias gss='git stash save'
+alias gss='git stash push'
 alias gsp='git stash pop'
 alias gsl='git stash list'
 
