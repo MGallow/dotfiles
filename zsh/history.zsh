@@ -3,7 +3,10 @@
 # History file configuration
 [ -z "$HISTFILE" ] && HISTFILE="$HOME/.zsh_history"
 HISTSIZE=50000
-SAVEHIST=10000
+SAVEHIST=50000
+
+# Record timestamp of command in HISTFILE
+setopt EXTENDED_HISTORY
 
 # Share history between sessions
 setopt SHARE_HISTORY
@@ -25,6 +28,9 @@ setopt HIST_REDUCE_BLANKS
 
 # Ignore commands that start with space
 setopt HIST_IGNORE_SPACE
+
+# Show command with history expansion before running it
+setopt HIST_VERIFY
 
 # Append to history file
 setopt APPEND_HISTORY

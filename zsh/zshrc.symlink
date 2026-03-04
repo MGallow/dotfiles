@@ -25,12 +25,8 @@ plugins=(
 # Load Oh My Zsh
 source $ZSH/oh-my-zsh.sh
 
-# User configuration
-export LANG=en_US.UTF-8
-export EDITOR='code-insiders --wait'
-export VISUAL='code-insiders --wait'
-
 # Load all .zsh files from the dotfiles directory
+# (EDITOR, VISUAL, LANG are set in system/env.zsh)
 for config_file ($DOTFILES/**/*.zsh) source $config_file
 
 # Python environment settings
@@ -43,16 +39,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
-# History settings
-HISTSIZE=50000
-SAVEHIST=10000
-setopt extended_history       # record timestamp of command in HISTFILE
-setopt hist_expire_dups_first # delete duplicates first when HISTFILE size exceeds HISTSIZE
-setopt hist_ignore_dups       # ignore duplicated commands history list
-setopt hist_ignore_space      # ignore commands that start with space
-setopt hist_verify           # show command with history expansion to user before running it
-setopt inc_append_history    # add commands to HISTFILE in order of execution
-setopt share_history         # share command history data
+# History is configured in zsh/history.zsh
 
 # Better directory navigation
 setopt auto_cd              # if command is a path, cd into it
