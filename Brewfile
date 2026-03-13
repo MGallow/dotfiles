@@ -7,8 +7,11 @@ brew "git-lfs"  # Git Large File Storage
 brew "tmux"
 brew "vim"
 brew "zsh"
-brew "node"     # Required for Claude Code and Gemini CLI
+brew "node"     # Required for Claude Code, Gemini CLI, and Codex CLI
 brew "python"
+
+# Python toolchain
+brew "uv"       # Fast Python package installer (used inside conda envs)
 
 # CLI tools
 brew "tree"

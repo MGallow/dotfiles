@@ -51,13 +51,22 @@ while test $# -gt 0; do
             cd "$dotfilesDirectory" || exit
             git pull origin main
 
-            # Update Claude Code CLI
+            # Update AI CLIs installed via npm
             if command -v npm &>/dev/null; then
                 echo "› updating Claude Code CLI"
                 npm update -g @anthropic-ai/claude-code 2>/dev/null || true
 
                 echo "› updating Gemini CLI"
                 npm update -g @google/gemini-cli 2>/dev/null || true
+
+                echo "› updating OpenAI Codex CLI"
+                npm update -g @openai/codex 2>/dev/null || true
+            fi
+
+            # Update uv
+            if command -v uv &>/dev/null; then
+                echo "› updating uv"
+                brew upgrade uv 2>/dev/null || true
             fi
 
             # Update GitHub Copilot CLI extension

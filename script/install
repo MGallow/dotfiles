@@ -37,7 +37,7 @@ success "Zsh plugins ready"
 # ── 4. Topic installers (ordered) ────────────────────────────────────────────
 # Run topic-specific install.sh files (skip script/ directory itself).
 # GitHub comes before Claude/Gemini because those check for `npm` (from brew).
-for topic in zsh python vscode github claude gemini; do
+for topic in zsh python vscode github claude gemini openai; do
     installer="$HOME/.dotfiles/$topic/install.sh"
     if [ -f "$installer" ]; then
         info "Running $topic installer"
@@ -55,6 +55,7 @@ find . -name install.sh \
     -not -path "./github/*" \
     -not -path "./claude/*" \
     -not -path "./gemini/*" \
+    -not -path "./openai/*" \
     | while read -r installer; do
         info "Running ${installer}..."
         bash "${installer}"
@@ -80,6 +81,7 @@ if [ ! -s "$HOME/.zshrc.local" ]; then
 
 # export ANTHROPIC_API_KEY=""   # Claude Code – https://console.anthropic.com
 # export GEMINI_API_KEY=""      # Gemini CLI  – https://aistudio.google.com/apikey
+# export OPENAI_API_KEY=""      # Codex / ChatGPT CLI – https://platform.openai.com/api-keys
 
 # ── Local overrides ───────────────────────────────────────────────────────────
 EOF
@@ -93,6 +95,7 @@ echo "  Next steps:"
 echo "    1. Open a new terminal (or run: source ~/.zshrc)"
 echo "    2. Authenticate GitHub CLI:  gh auth login"
 echo "    3. Authenticate Claude Code: claude"
-echo "    4. Authenticate Gemini CLI:  gemini"
-echo "    5. Add API keys to ~/.zshrc.local if using non-interactive mode"
+echo "    4. Authenticate Gemini CLI:   gemini"
+echo "    5. Set Codex API key:         add OPENAI_API_KEY to ~/.zshrc.local"
+echo "    6. Add all AI API keys to ~/.zshrc.local for non-interactive use"
 echo ""

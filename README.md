@@ -9,12 +9,15 @@ A collection of dotfiles and scripts to set up a complete macOS development envi
 | Zsh + Oh My Zsh | Shell with plugins, themes, and smart aliases |
 | Git | Global config, aliases, and global ignore rules |
 | Vim / Tmux | Terminal editor and multiplexer |
-| VS Code (+ Insiders) | Editor with 75+ extensions pre-installed |
+| VS Code Insiders | Editor with 75+ extensions, ruff, Copilot |
 | GitHub CLI (`gh`) | GitHub from the terminal |
 | GitHub Copilot (VS Code + CLI) | AI pair programmer in editor and shell |
-| Claude Code (`claude`) | Anthropic's AI coding agent in the terminal |
-| Gemini CLI (`gemini`) | Google's AI assistant in the terminal |
-| Python / Miniconda | Data science stack with Black, pytest, mypy |
+| Claude Code (`claude`) | Anthropic's AI coding agent |
+| Gemini CLI (`gemini`) | Google's AI assistant |
+| OpenAI Codex CLI (`codex`) | ChatGPT / Codex in the terminal |
+| Python / Miniconda + uv | Conda environments with fast package install |
+| Ruff | Fast linter + formatter (replaces black, flake8, isort) |
+| pre-commit | Git hooks: ruff, mypy, secret detection |
 | Homebrew | macOS package manager |
 | macOS defaults | Sensible system preferences |
 
@@ -24,8 +27,8 @@ A collection of dotfiles and scripts to set up a complete macOS development envi
 
 Before you begin, make sure you have:
 
-1. **macOS Monterey (12) or newer** — tested on Monterey, Ventura, Sonoma, Sequoia
-2. **Xcode Command Line Tools** — provides `git` and build tools
+1. **macOS Monterey (12) or newer**
+2. **Xcode Command Line Tools** — provides `git` and build tools:
 
    ```bash
    xcode-select --install
@@ -50,8 +53,9 @@ cd ~/.dotfiles
 
 # 4. Open a new terminal, then authenticate your AI tools
 gh auth login
-claude
-gemini
+claude         # follow interactive auth
+gemini         # follow interactive auth
+# For Codex: add OPENAI_API_KEY to ~/.zshrc.local
 ```
 
 ---
@@ -65,7 +69,7 @@ git clone https://github.com/yourusername/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 ```
 
-> The repo is expected to live at `~/.dotfiles`. Other paths work but you may need to update `$DOTFILES` in `zsh/zshrc.symlink`.
+> The repo is expected to live at `~/.dotfiles`.
 
 ---
 
@@ -76,7 +80,7 @@ cd ~/.dotfiles
 ```
 
 This will:
-- Prompt you for your **Git author name and email** (used in `~/.gitconfig.local`)
+- Prompt you for your **Git author name and email** (stored in `~/.gitconfig.local`, which is gitignored)
 - Create **symlinks** from your home directory to the dotfiles:
   - `~/.zshrc` → `zsh/zshrc.symlink`
   - `~/.gitconfig` → `git/gitconfig.symlink`
@@ -100,15 +104,16 @@ This runs the full installation in order:
 | Homebrew | Installs Homebrew if missing, then runs `brew bundle` from `Brewfile` |
 | Oh My Zsh | Installs Oh My Zsh and the `zsh-autosuggestions` / `zsh-syntax-highlighting` plugins |
 | Zsh | Configures shell completions and plugins |
-| Python | Installs Miniconda and creates the base conda environment |
-| VS Code | Symlinks settings/keybindings, installs all extensions including GitHub Copilot |
+| Python | Installs Miniconda + uv, creates base conda environment with ruff/pytest/pre-commit |
+| VS Code Insiders | Symlinks settings/keybindings, installs all extensions including ruff + Copilot |
 | GitHub CLI | Installs the `gh-copilot` extension, checks auth status |
-| Claude Code | Installs the `@anthropic-ai/claude-code` npm package |
-| Gemini CLI | Installs the `@google/gemini-cli` npm package |
-| macOS defaults | Applies sensible system preferences (Finder, Dock, keyboard, etc.) |
-| Local stubs | Creates `~/.zshrc.local` and `~/.gitconfig.local` with commented placeholders |
+| Claude Code | Installs `@anthropic-ai/claude-code` via npm |
+| Gemini CLI | Installs `@google/gemini-cli` via npm |
+| OpenAI Codex | Installs `@openai/codex` via npm |
+| macOS defaults | Applies sensible system preferences |
+| Local stubs | Creates `~/.zshrc.local` and `~/.gitconfig.local` with API key placeholders |
 
-> **Tip:** The install script is idempotent — safe to re-run at any time.
+> The install script is idempotent — safe to re-run at any time.
 
 ---
 
@@ -127,26 +132,20 @@ source ~/.zshrc
 
 ```bash
 gh auth login
-```
-
-Follow the interactive prompts. Choose **HTTPS** for the protocol and **GitHub.com** as the host. A browser window will open to complete OAuth.
-
-Verify it worked:
-
-```bash
-gh auth status
+# Choose: SSH protocol, GitHub.com
+gh auth status    # verify
 ```
 
 #### GitHub Copilot CLI
 
-The `gh-copilot` extension is installed automatically. After `gh auth login` it's ready:
+Installed automatically. After `gh auth login`:
 
 ```bash
 ghcs 'how do I undo the last git commit'    # suggest a command
 ghce 'git rebase -i HEAD~3'                 # explain a command
 ```
 
-> You need an active **GitHub Copilot subscription** (individual, team, or enterprise).
+> Requires an active **GitHub Copilot subscription**.
 
 #### Claude Code
 
@@ -154,20 +153,13 @@ ghce 'git rebase -i HEAD~3'                 # explain a command
 claude
 ```
 
-On first launch, Claude Code will walk you through authentication via your **Anthropic Console** account. You can also set an API key directly:
+On first launch, Claude Code walks you through OAuth. Or set an API key in `~/.zshrc.local`:
 
 ```bash
-# Add to ~/.zshrc.local (already scaffolded for you)
 export ANTHROPIC_API_KEY="sk-ant-..."
 ```
 
 Get your key at <https://console.anthropic.com>.
-
-Verify it worked:
-
-```bash
-claude --version
-```
 
 #### Gemini CLI
 
@@ -175,49 +167,92 @@ claude --version
 gemini
 ```
 
-On first launch, Gemini CLI will authenticate via Google. You can also use an API key:
+Or set an API key in `~/.zshrc.local`:
 
 ```bash
-# Add to ~/.zshrc.local
 export GEMINI_API_KEY="AIza..."
 ```
 
 Get your key at <https://aistudio.google.com/apikey>.
 
+#### OpenAI Codex CLI
+
+Add to `~/.zshrc.local`:
+
+```bash
+export OPENAI_API_KEY="sk-..."
+```
+
+Then run `codex` to start an interactive session.
+
+Get your key at <https://platform.openai.com/api-keys>.
+
 ---
 
-## What's Installed
+## Python Workflow
 
-### Homebrew Packages
+This setup uses **Miniconda** for environment management and **uv** for fast package installation inside those environments. **Ruff** handles linting, formatting, and import sorting (replacing black, flake8, and isort).
 
-See [`Brewfile`](Brewfile) for the full list. Key packages:
+### Creating a new project
 
-| Package | Why |
-|---------|-----|
-| `git` + `git-lfs` | Version control |
-| `gh` | GitHub CLI + Copilot extension |
-| `node` | Runtime for Claude Code and Gemini CLI |
-| `fzf` | Fuzzy finder (used by zsh history search) |
-| `ripgrep` | Fast code search (`rg`) |
-| `bat` | Syntax-highlighted `cat` |
-| `eza` | Modern `ls` with icons |
-| `zoxide` | Smarter `cd` (learns your dirs) |
-| `tmux` | Terminal multiplexer |
+```bash
+pycreate myproject
+```
 
-### VS Code Extensions
+Scaffolds `myproject/` with:
+- `pyproject.toml` — ruff + mypy + pytest config
+- `environment.yml` — conda env with Python 3.11 + uv
+- `.pre-commit-config.yaml` — ruff, mypy, secret detection hooks
+- `src/`, `tests/`, `docs/` directories
 
-All extensions are installed for both **VS Code** and **VS Code Insiders**. Highlights:
+Then:
 
-- `github.copilot` + `github.copilot-chat` — AI pair programmer
-- `ms-python.python` + `ms-python.vscode-pylance` — Python language support
-- `ms-toolsai.jupyter` — Jupyter notebooks
-- `ms-vscode-remote.remote-ssh` — Remote development
-- `eamodio.gitlens` — Enhanced Git history/blame
-- `github.vscode-pull-request-github` — PR reviews in editor
+```bash
+cd myproject
+conda env create -f environment.yml
+conda activate myproject
+uv pip install -e '.[dev]'
+pre-commit install
+```
 
-### Shell Aliases
+### Creating a quick environment
 
-#### AI Tools
+```bash
+pyenv myenv          # Python 3.11 (default)
+pyenv myenv 3.12     # specific version
+```
+
+### Installing packages with uv
+
+Always use `uv pip install` inside conda environments for speed:
+
+```bash
+conda activate myenv
+uv pip install pandas numpy scikit-learn
+uv pip install -r requirements.txt
+```
+
+### Linting and formatting with ruff
+
+```bash
+rf          # lint
+rff         # lint + auto-fix
+rfmt        # format (black-compatible)
+```
+
+### Running pre-commit
+
+```bash
+pci         # pre-commit install (first time in a repo)
+pc          # pre-commit run --all-files
+pcu         # pre-commit autoupdate
+```
+
+---
+
+## Shell Alias Reference
+
+### AI Tools
 
 | Alias | Command |
 |-------|---------|
@@ -225,21 +260,27 @@ All extensions are installed for both **VS Code** and **VS Code Insiders**. High
 | `clc` | `claude --continue` |
 | `clp` | `claude --print` |
 | `gai` | `gemini` |
+| `cdx` | `codex` |
 | `ghcs` | `gh copilot suggest` |
 | `ghce` | `gh copilot explain` |
 
-#### Git
+### Python / uv / ruff
 
 | Alias | Command |
 |-------|---------|
-| `gst` | `git status` |
-| `gc` | `git commit` |
-| `gco` | `git checkout` |
-| `gb` | `git branch` |
-| `glg` | `git log --graph` |
-| `gnb` | Create + push new branch |
+| `ca` | `conda activate` |
+| `cda` | `conda deactivate` |
+| `clist` | `conda list` |
+| `uvi` | `uv pip install` |
+| `uvs` | `uv pip sync` |
+| `rf` | `ruff check .` |
+| `rff` | `ruff check . --fix` |
+| `rfmt` | `ruff format .` |
+| `pt` / `ptv` / `ptc` | pytest shortcuts |
+| `mpy` | `mypy .` |
+| `pc` / `pci` / `pcu` | pre-commit shortcuts |
 
-#### GitHub CLI
+### GitHub CLI
 
 | Alias | Command |
 |-------|---------|
@@ -250,35 +291,22 @@ All extensions are installed for both **VS Code** and **VS Code Insiders**. High
 | `ghil` | `gh issue list` |
 | `ghwl` | `gh run list` |
 
-#### Python
-
-| Alias | Command |
-|-------|---------|
-| `ca` | `conda activate` |
-| `pt` | `pytest` |
-| `ptv` | `pytest -v` |
-| `ptc` | `pytest --cov` |
-| `bl` | `black .` |
-
 ---
 
 ## Customization
 
 ### Local overrides (never committed)
 
-Two files are created but gitignored — put machine-specific config here:
-
 **`~/.zshrc.local`** — loaded at the end of every shell session:
 
 ```bash
-# API keys
+# API keys — never commit these
 export ANTHROPIC_API_KEY="sk-ant-..."
 export GEMINI_API_KEY="AIza..."
+export OPENAI_API_KEY="sk-..."
 
-# Machine-specific PATH additions
+# Machine-specific overrides
 export PATH="$HOME/work/tools/bin:$PATH"
-
-# Work-specific aliases
 alias work='cd ~/work/mycompany'
 ```
 
@@ -294,18 +322,12 @@ alias work='cd ~/work/mycompany'
 
 ### Adding a new topic
 
-Each tool lives in its own directory (a "topic"). To add your own:
-
 ```
 mytool/
 ├── install.sh        # Runs during ./script/install
 ├── aliases.zsh       # Sourced into every shell session
 └── mytool.conf.symlink  # Symlinked to ~/.mytool.conf
 ```
-
-- Any `*.symlink` file is linked to `~/.<basename>` during `./script/bootstrap`
-- Any `*.zsh` file is sourced automatically by `.zshrc`
-- Any `install.sh` is executed by `./script/install`
 
 ---
 
@@ -317,63 +339,51 @@ mytool/
 dot update
 ```
 
-This will:
-1. `brew update && brew upgrade && brew cleanup`
-2. Update Oh My Zsh
-3. `git pull` the dotfiles repo
-4. `npm update -g @anthropic-ai/claude-code`
-5. `npm update -g @google/gemini-cli`
-6. `gh extension upgrade --all`
-7. Update all VS Code extensions
+Updates: Homebrew packages, Oh My Zsh, dotfiles repo, Claude Code, Gemini CLI, Codex CLI, uv, gh extensions, and VS Code extensions.
 
 ### Edit dotfiles
 
 ```bash
-dot --edit    # opens ~/.dotfiles in VS Code
-```
-
-### Re-run install after pulling changes
-
-```bash
-cd ~/.dotfiles && ./script/install
+dot --edit    # opens ~/.dotfiles in VS Code Insiders
 ```
 
 ---
 
-## Directory Structure
+## Security
 
-```
-~/.dotfiles/
-├── bin/              # Utility scripts added to $PATH
-│   ├── dot           # Dotfiles manager (dot update, dot --edit)
-│   ├── c             # Directory bookmarking
-│   ├── e             # Smart editor launcher
-│   ├── zssh          # SSH with auto key loading
-│   └── ...
-├── claude/           # Claude Code CLI
-│   ├── install.sh
-│   └── aliases.zsh
-├── gemini/           # Gemini CLI
-│   ├── install.sh
-│   └── aliases.zsh
-├── git/              # Git config and aliases
-├── github/           # GitHub CLI + Copilot CLI
-│   ├── install.sh
-│   └── aliases.zsh
-├── homebrew/         # Homebrew installer
-├── macos/            # macOS system defaults
-├── python/           # Miniconda + data science stack
-├── script/
-│   ├── bootstrap     # Creates symlinks, prompts for Git identity
-│   └── install       # Full installation orchestrator
-├── system/           # PATH, env vars, system aliases
-├── tmux/             # Tmux config
-├── vim/              # Vim config
-├── vscode/           # VS Code settings, keybindings, extensions
-├── zsh/              # Zsh config, plugins, aliases, functions
-├── Brewfile          # Homebrew package manifest
-└── README.md
-```
+### What this repo does NOT contain
+
+- No API keys, tokens, or passwords
+- No SSH private keys
+- No personal git credentials (those live in `~/.gitconfig.local`, which is gitignored)
+
+### Security design
+
+| Decision | Rationale |
+|---|---|
+| `~/.gitconfig.local` is gitignored | Name/email are personal; generated by bootstrap |
+| `~/.zshrc.local` is gitignored | API keys and personal overrides live here |
+| `git/gitignore.symlink` blocks `*.pem`, `*_rsa`, `.aws/`, `.ssh/`, `.env*` | Belt-and-suspenders secret protection |
+| `detect-private-key` pre-commit hook | Catches accidental key inclusion before any commit |
+| macOS Keychain for git credentials | No passwords stored in plaintext |
+
+### Third-party install scripts
+
+| Script | Source | What it does |
+|---|---|---|
+| Homebrew installer | `github.com/Homebrew/install` | Installs Homebrew |
+| Oh My Zsh installer | `github.com/ohmyzsh/ohmyzsh` | Installs Oh My Zsh |
+| uv installer (fallback only) | `astral.sh/uv/install.sh` | Only if `brew install uv` fails |
+
+All other tools are installed via `npm install -g` or `brew install`.
+
+### macOS defaults — is it safe?
+
+All changes are reversible `defaults write` commands. No brick risk:
+
+- The `killall` at the end only restarts UI apps (Finder, Dock, Safari, Terminal) — all relaunch automatically
+- Does **not** touch: boot config, SIP, kernel extensions, network config, or nvram
+- **LSQuarantine (Gatekeeper warning)** is **left enabled** — the line is commented out in `macos/set-defaults.sh` because it weakens a real security control
 
 ---
 
@@ -381,76 +391,66 @@ cd ~/.dotfiles && ./script/install
 
 ### `command not found: brew`
 
-Homebrew wasn't installed or isn't on your PATH yet. Run:
-
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-Then follow the instructions Homebrew prints at the end (it will tell you to add a line to your shell profile).
+On Apple Silicon, follow the post-install instructions to add brew to your PATH.
 
-### `command not found: claude` / `command not found: gemini`
-
-Node wasn't on PATH when the install ran, or npm install failed. Fix:
+### `command not found: claude` / `codex` / `gemini`
 
 ```bash
 npm install -g @anthropic-ai/claude-code
+npm install -g @openai/codex
 npm install -g @google/gemini-cli
 ```
 
-### `gh: command not found`
-
-Homebrew didn't install `gh`. Run:
+### `command not found: uv`
 
 ```bash
-brew install gh
+brew install uv
 ```
 
 ### Symlinks point to wrong location
-
-Re-run the bootstrap:
 
 ```bash
 cd ~/.dotfiles && ./script/bootstrap
 ```
 
-### macOS says "cannot be opened because the developer cannot be verified"
-
-Run this to remove the quarantine attribute:
-
-```bash
-xattr -d com.apple.quarantine ~/.dotfiles/script/install
-xattr -d com.apple.quarantine ~/.dotfiles/script/bootstrap
-```
-
 ### VS Code extensions failed to install
 
-Make sure `code` is on your PATH. Open VS Code → **Command Palette** → `Shell Command: Install 'code' command in PATH`. Then re-run:
+Open VS Code Insiders → Command Palette → `Shell Command: Install 'code-insiders' command in PATH`. Then:
 
 ```bash
 ~/.dotfiles/vscode/install.sh
 ```
 
----
+### ruff not formatting on save
 
-## Security Notes
+```bash
+code-insiders --install-extension charliermarsh.ruff
+```
 
-- **Never commit API keys.** Use `~/.zshrc.local` (gitignored) for secrets.
-- The `.gitignore` at the root blocks common secret files (`.env`, `.pem`, `.aws/`, `.ssh/`, etc.)
-- Pre-commit hooks detect private keys before any accidental commit.
-- Git credentials are stored in the macOS Keychain (`osxkeychain` helper).
+Verify `settings.json` has `"editor.defaultFormatter": "charliermarsh.ruff"` under `[python]`.
+
+### conda not found after install
+
+```bash
+source ~/.zshrc
+# or if that doesn't work:
+conda init zsh && source ~/.zshrc
+```
 
 ---
 
 ## Prerequisites Checklist
 
-Before running `./script/install`, ensure:
-
 - [ ] macOS Monterey or newer
 - [ ] Xcode Command Line Tools: `xcode-select --install`
 - [ ] GitHub account (for `gh auth login` and Copilot)
-- [ ] Anthropic account (for Claude Code) — <https://console.anthropic.com>
-- [ ] Google account (for Gemini CLI) — <https://aistudio.google.com>
+- [ ] Anthropic account — <https://console.anthropic.com>
+- [ ] Google account — <https://aistudio.google.com>
+- [ ] OpenAI account — <https://platform.openai.com>
 
 ---
 
