@@ -23,9 +23,17 @@ fi
 # ── Brewfile ──────────────────────────────────────────────────────────────────
 brew update
 
+# Resolve Brewfile location: prefer $DOTFILES env var, fall back to ~/.dotfiles
+BREWFILE="${DOTFILES:-$HOME/.dotfiles}/Brewfile"
+
 # `--no-upgrade` means: install missing packages but don't upgrade ones that are
 # already present (important when restoring from a backup — avoids mass upgrades).
 # Run `brew upgrade` separately or via `dot update` when you want to upgrade.
-brew bundle install --file="$DOTFILES/Brewfile" --no-upgrade
+if [[ "${DOTFILES_CI:-}" == "1" ]]; then
+    echo "  CI mode: skipping casks and mas (formulae only)"
+    brew bundle install --file="$BREWFILE" --no-upgrade --no-lock --verbose --no-cask --no-mas
+else
+    brew bundle install --file="$BREWFILE" --no-upgrade
+fi
 
 brew cleanup
