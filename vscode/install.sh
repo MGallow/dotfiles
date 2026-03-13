@@ -13,6 +13,7 @@ ln -sf "$DOTFILES/vscode/settings.json" "$HOME/Library/Application Support/Code 
 ln -sf "$DOTFILES/vscode/keybindings.json" "$HOME/Library/Application Support/Code - Insiders/User/keybindings.json"
 
 # Install extensions
+code --install-extension charliermarsh.ruff
 code --install-extension davidanson.vscode-markdownlint
 code --install-extension eamodio.gitlens
 code --install-extension formulahendry.azure-storage-explorer
@@ -76,7 +77,8 @@ code --install-extension vscode-icons-team.vscode-icons
 code --install-extension whitphx.vscode-stlite
 
 # Do the same for VS Code Insiders if it exists
-if command -v code-insiders &> /dev/null; then
+if command -v code-insiders &>/dev/null; then
+    code-insiders --install-extension charliermarsh.ruff
     code-insiders --install-extension davidanson.vscode-markdownlint
     code-insiders --install-extension eamodio.gitlens
     code-insiders --install-extension formulahendry.azure-storage-explorer

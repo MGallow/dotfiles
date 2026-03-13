@@ -6,53 +6,93 @@ set -e
 
 cd "$(dirname "$0")"/..
 
-# Install Homebrew dependencies
-echo "› Installing Homebrew dependencies"
-$HOME/.dotfiles/homebrew/install.sh 2>&1
+info()    { printf "\r  [ \033[00;34m..\033[0m ] %s\n" "$1"; }
+success() { printf "\r\033[2K  [ \033[00;32mOK\033[0m ] %s\n" "$1"; }
 
-# Install Oh My Zsh if not already installed
+# ── 1. Homebrew ──────────────────────────────────────────────────────────────
+info "Installing Homebrew dependencies"
+"$HOME/.dotfiles/homebrew/install.sh" 2>&1
+success "Homebrew dependencies installed"
+
+# ── 2. Oh My Zsh ─────────────────────────────────────────────────────────────
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    echo "› Installing Oh My Zsh"
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    info "Installing Oh My Zsh"
+    RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    success "Oh My Zsh installed"
 fi
 
-# Install Zsh plugins
-ZSH_CUSTOM="$HOME/.oh-my-zsh/custom"
+# ── 3. Zsh plugins ───────────────────────────────────────────────────────────
+ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
 if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
-    echo "› Installing zsh-autosuggestions"
-    git clone https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM}/plugins/zsh-autosuggestions"
+    info "Installing zsh-autosuggestions"
+    git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM}/plugins/zsh-autosuggestions"
 fi
 
 if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
-    echo "› Installing zsh-syntax-highlighting"
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting"
+    info "Installing zsh-syntax-highlighting"
+    git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting"
 fi
+success "Zsh plugins ready"
 
-# Find all install.sh files and run them
-find . -name install.sh -not -path "./script/*" | while read installer ; do
-    echo "› Running ${installer}..."
-    sh -c "${installer}"
+# ── 4. Topic installers (ordered) ────────────────────────────────────────────
+# Run topic-specific install.sh files (skip script/ directory itself).
+# GitHub comes before Claude/Gemini because those check for `npm` (from brew).
+for topic in zsh python vscode github claude gemini openai; do
+    installer="$HOME/.dotfiles/$topic/install.sh"
+    if [ -f "$installer" ]; then
+        info "Running $topic installer"
+        bash "$installer"
+        success "$topic setup complete"
+    fi
 done
 
-# Set macOS defaults
+# Run any remaining install.sh files not covered above
+find . -name install.sh \
+    -not -path "./script/*" \
+    -not -path "./zsh/*" \
+    -not -path "./python/*" \
+    -not -path "./vscode/*" \
+    -not -path "./github/*" \
+    -not -path "./claude/*" \
+    -not -path "./gemini/*" \
+    -not -path "./openai/*" \
+    | while read -r installer; do
+        info "Running ${installer}..."
+        bash "${installer}"
+    done
+
+# ── 5. macOS defaults ─────────────────────────────────────────────────────────
 if [ "$(uname -s)" = "Darwin" ]; then
-    echo "› Setting macOS defaults..."
-    $HOME/.dotfiles/macos/set-defaults.sh
+    info "Setting macOS defaults"
+    "$HOME/.dotfiles/macos/set-defaults.sh"
+    success "macOS defaults applied"
 fi
 
-# Create local config files if they don't exist
-echo "› Creating local config files..."
+# ── 6. Local config stubs ─────────────────────────────────────────────────────
+info "Creating local config stubs"
 touch "$HOME/.zshrc.local"
 touch "$HOME/.gitconfig.local"
 
-# Set up VS Code
-if command -v code >/dev/null; then
-    echo "› Setting up VS Code..."
-    $HOME/.dotfiles/vscode/install.sh
+# Seed .zshrc.local with stubs if it's empty
+if [ ! -s "$HOME/.zshrc.local" ]; then
+    cat >> "$HOME/.zshrc.local" <<'EOF'
+# ── AI API Keys ───────────────────────────────────────────────────────────────
+# Claude Code and Gemini CLI use browser-based sign-in — no key needed.
+# Codex CLI (OpenAI) requires an API key; add it here if using Codex.
+# export OPENAI_API_KEY=""      # https://platform.openai.com/api-keys
+
+# ── Local overrides ───────────────────────────────────────────────────────────
+EOF
 fi
+success "Local config stubs ready"
 
-# Set up Python development environment
-echo "› Setting up Python development environment..."
-$HOME/.dotfiles/python/install.sh
-
-echo "› All installations complete!"
+echo ""
+echo "  ✓ All installations complete!"
+echo ""
+echo "  Next steps:"
+echo "    1. Open a new terminal (or run: source ~/.zshrc)"
+echo "    2. Authenticate GitHub CLI:  gh auth login"
+echo "    3. Sign in to Claude Code:    claude  (browser opens automatically)"
+echo "    4. Sign in to Gemini CLI:     gemini  (browser opens automatically)"
+echo "    5. Codex (OpenAI) API key:    add OPENAI_API_KEY to ~/.zshrc.local"
+echo ""

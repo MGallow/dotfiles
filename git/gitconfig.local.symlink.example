@@ -1,7 +1,7 @@
 [user]
-    name = GITHUB_USER
-    email = GITHUB_EMAIL
+    name = AUTHOR_NAME
+    email = AUTHOR_EMAIL
 [github]
-    user = GITHUB_USER
+    user = AUTHOR_NAME
 [credential]
-    helper = osxkeychain
+    helper = GIT_CREDENTIAL_HELPER
