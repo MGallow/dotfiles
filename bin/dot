@@ -16,9 +16,9 @@ displayUsageAndExit() {
     echo "Usage: dot [options]"
     echo ""
     echo "Options:"
-    echo "  -e, --edit    Open dotfiles directory for editing"
+    echo "  -e, --edit    Open dotfiles directory for editing in VS Code"
     echo "  -h, --help    Show this help message and exit"
-    echo "  update        Update packages and pkg managers"
+    echo "  update        Update packages, AI tools, and pkg managers"
     exit
 }
 
@@ -44,17 +44,32 @@ while test $# -gt 0; do
 
             # Update Oh My Zsh
             echo "› updating oh-my-zsh"
-            /bin/sh $ZSH/tools/upgrade.sh
+            /bin/sh "$ZSH/tools/upgrade.sh"
 
             # Update dotfiles
-            echo "› git pull origin master"
+            echo "› git pull origin main"
             cd "$dotfilesDirectory" || exit
-            git pull origin master
+            git pull origin main
+
+            # Update Claude Code CLI
+            if command -v npm &>/dev/null; then
+                echo "› updating Claude Code CLI"
+                npm update -g @anthropic-ai/claude-code 2>/dev/null || true
+
+                echo "› updating Gemini CLI"
+                npm update -g @google/gemini-cli 2>/dev/null || true
+            fi
+
+            # Update GitHub Copilot CLI extension
+            if command -v gh &>/dev/null; then
+                echo "› updating gh extensions"
+                gh extension upgrade --all 2>/dev/null || true
+            fi
 
             # Update all VS Code extensions
             echo "› updating VS Code extensions"
             code --list-extensions | xargs -L 1 code --install-extension
-            if command -v code-insiders &> /dev/null; then
+            if command -v code-insiders &>/dev/null; then
                 code-insiders --list-extensions | xargs -L 1 code-insiders --install-extension
             fi
 
@@ -71,7 +86,7 @@ done
 export ZSH=$HOME/.oh-my-zsh
 
 # Install homebrew
-$dotfilesDirectory/homebrew/install.sh 2>&1
+"$dotfilesDirectory/homebrew/install.sh" 2>&1
 
 # Upgrade homebrew
 echo "› brew update"
@@ -79,4 +94,4 @@ brew update
 
 # Install software
 echo "› $dotfilesDirectory/script/install"
-$dotfilesDirectory/script/install
+"$dotfilesDirectory/script/install"
