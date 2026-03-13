@@ -1,25 +1,31 @@
 #!/usr/bin/env bash
 #
-# Zsh setup
-#
-# This installs Oh My Zsh and necessary plugins
+# Zsh setup — Oh My Zsh and plugins
+# Note: script/install also calls this logic with RUNZSH=no CHSH=no set.
+# This file exists for standalone use; script/install is the primary entry point.
 
-# Install Oh My Zsh if it's not already installed
+# Install Oh My Zsh if not already installed
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
-  echo "Installing Oh My Zsh..."
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    echo "  Installing Oh My Zsh..."
+    # RUNZSH=no prevents Oh My Zsh from immediately replacing the current shell
+    # CHSH=no prevents it from attempting to change the default shell (we do that manually)
+    RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
-# Install zsh-autosuggestions plugin if not already installed
-if [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions" ]; then
-  echo "Installing zsh-autosuggestions plugin..."
-  git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+
+# Install zsh-autosuggestions plugin
+if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
+    echo "  Installing zsh-autosuggestions..."
+    git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions \
+        "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
 fi
 
-# Install zsh-syntax-highlighting plugin if not already installed
-if [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting" ]; then
-  echo "Installing zsh-syntax-highlighting plugin..."
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+# Install zsh-syntax-highlighting plugin
+if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
+    echo "  Installing zsh-syntax-highlighting..."
+    git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git \
+        "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
 fi
 
-echo "Zsh setup completed!"
+echo "  Zsh setup complete."

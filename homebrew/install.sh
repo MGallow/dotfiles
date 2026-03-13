@@ -1,22 +1,31 @@
 #!/usr/bin/env bash
+#
+# Install Homebrew and all packages from the Brewfile.
+# Safe to re-run: skips installation if already present, uses `brew bundle --no-upgrade`
+# on first install so an existing Mac backup isn't mass-upgraded unexpectedly.
 
-# Check for Homebrew and install if not found
-if ! command -v brew &> /dev/null; then
-  echo "Installing Homebrew..."
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+set -e
 
-  if [[ $(uname -m) == "arm64" ]]; then
-    # For Apple Silicon Macs
-    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$HOME/.zprofile"
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-  fi
+# ── Homebrew ──────────────────────────────────────────────────────────────────
+if ! command -v brew &>/dev/null; then
+    echo "  Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    # Apple Silicon: add brew to PATH for this session and persist to .zprofile
+    if [[ "$(uname -m)" == "arm64" ]]; then
+        echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$HOME/.zprofile"
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    fi
+else
+    echo "  Homebrew already installed: $(brew --version | head -1)"
 fi
 
-# Update Homebrew recipes
+# ── Brewfile ──────────────────────────────────────────────────────────────────
 brew update
 
-# Install all dependencies from Brewfile
-brew bundle install --file="$DOTFILES/Brewfile"
+# `--no-upgrade` means: install missing packages but don't upgrade ones that are
+# already present (important when restoring from a backup — avoids mass upgrades).
+# Run `brew upgrade` separately or via `dot update` when you want to upgrade.
+brew bundle install --file="$DOTFILES/Brewfile" --no-upgrade
 
-# Remove outdated versions
 brew cleanup

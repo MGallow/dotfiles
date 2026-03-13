@@ -18,6 +18,7 @@ A collection of dotfiles and scripts to set up a complete macOS development envi
 | Python / Miniconda + uv | Conda environments with fast package install |
 | Ruff | Fast linter + formatter (replaces black, flake8, isort) |
 | pre-commit | Git hooks: ruff, mypy, secret detection |
+| Google Chrome | Primary browser |
 | Homebrew | macOS package manager |
 | macOS defaults | Sensible system preferences |
 
@@ -384,6 +385,66 @@ All changes are reversible `defaults write` commands. No brick risk:
 - The `killall` at the end only restarts UI apps (Finder, Dock, Safari, Terminal) — all relaunch automatically
 - Does **not** touch: boot config, SIP, kernel extensions, network config, or nvram
 - **LSQuarantine (Gatekeeper warning)** is **left enabled** — the line is commented out in `macos/set-defaults.sh` because it weakens a real security control
+
+---
+
+## Restoring from a Mac Backup
+
+These scripts are designed to be **safe when run on a Mac that already has software installed** (e.g., migrated from a Time Machine backup or using Migration Assistant).
+
+### What each script does when software already exists
+
+| Script | Already installed behaviour |
+|---|---|
+| `homebrew/install.sh` | Skips Homebrew install; runs `brew bundle --no-upgrade` (installs missing packages only, does **not** upgrade existing ones) |
+| `script/install` (Oh My Zsh) | Skips if `~/.oh-my-zsh` already exists |
+| `script/install` (zsh plugins) | Skips if plugin directory already exists |
+| `claude/install.sh` | Skips npm install if `claude` is on PATH |
+| `gemini/install.sh` | Skips npm install if `gemini` is on PATH |
+| `openai/install.sh` | Skips npm install if `codex` is on PATH |
+| `github/install.sh` | Skips extension install if already present; skips auth prompt if already authed |
+| `python/install.sh` | Updates (not replaces) the base conda env; skips if `uv` already installed |
+| `vscode/install.sh` | `--install-extension` is idempotent — silently skips already-installed extensions |
+| `script/bootstrap` (symlinks) | Detects existing files and prompts: skip / overwrite / backup |
+| `macos/set-defaults.sh` | `defaults write` is idempotent — re-applying the same value is harmless |
+
+### Recommended restore workflow
+
+**Option A — Full fresh install** (wipe + reinstall macOS, then run dotfiles):
+```bash
+# Standard flow — see Quick Start above
+./script/bootstrap && ./script/install
+```
+
+**Option B — Mac backup restore** (Migration Assistant or Time Machine, then run dotfiles):
+```bash
+# 1. Bootstrap: re-creates symlinks; prompts for any conflicts
+./script/bootstrap
+
+# 2. Install: missing tools are added; existing ones are left alone
+./script/install
+
+# 3. Check what brew bundle would change before actually running it
+brew bundle check --file=~/.dotfiles/Brewfile
+```
+
+### What you may need to re-do after a restore
+
+- **`gh auth login`** — GitHub CLI auth tokens don't survive machine migrations
+- **`claude` / `gemini` / `codex` auth** — AI tool session tokens are machine-local; re-authenticate each
+- **VS Code extensions** — Settings Sync usually restores these automatically if logged in to GitHub in VS Code Insiders
+- **conda environments** — Project-specific environments are not part of this repo; recreate with `conda env create -f environment.yml` per project
+
+### Potential conflict: existing `~/.zshrc`
+
+If your restored Mac has a `~/.zshrc` that is not a symlink to these dotfiles, bootstrap will detect it and ask:
+
+```
+File already exists: ~/.zshrc, what do you want to do?
+[s]kip, [S]kip all, [o]verwrite, [O]verwrite all, [b]ackup, [B]ackup all?
+```
+
+Choose **`b` (backup)** to save the existing file to `~/.zshrc.backup` before symlinking, so you can merge any custom settings into `~/.zshrc.local` afterwards.
 
 ---
 

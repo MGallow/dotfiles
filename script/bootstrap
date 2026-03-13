@@ -38,7 +38,11 @@ setup_gitconfig() {
         read -p 'What is your github author name? ' git_authorname
         read -p 'What is your github author email? ' git_authoremail
 
-        sed -e "s/AUTHOR_NAME/$git_authorname/g" -e "s/AUTHOR_EMAIL/$git_authoremail/g" -e "s/GIT_CREDENTIAL_HELPER/$git_credential/g" git/gitconfig.local.symlink.example > git/gitconfig.local.symlink
+        # Use | as the sed delimiter to safely handle names/emails that contain /
+        sed -e "s|AUTHOR_NAME|$git_authorname|g" \
+            -e "s|AUTHOR_EMAIL|$git_authoremail|g" \
+            -e "s|GIT_CREDENTIAL_HELPER|$git_credential|g" \
+            git/gitconfig.local.symlink.example > git/gitconfig.local.symlink
 
         success 'gitconfig'
     fi

@@ -16,8 +16,23 @@ alias showdesktop="defaults write com.apple.finder CreateDesktop -bool true && k
 # Lock the screen
 alias afk="osascript -e 'tell application \"System Events\" to keystroke \"q\" using {command down,control down}'"
 
-# Empty the Trash on all mounted volumes and the main HDD
-alias emptytrash="sudo rm -rfv /Volumes/*/.Trashes; sudo rm -rfv ~/.Trash"
+# Empty the Trash on all mounted volumes and the main HDD (with confirmation)
+emptytrash() {
+    echo "This will permanently delete:"
+    echo "  - ~/.Trash"
+    echo "  - .Trashes on all mounted volumes"
+    printf "Are you sure? [y/N] "
+    read -r reply
+    if [[ "$reply" =~ ^[Yy]$ ]]; then
+        sudo rm -rfv ~/.Trash
+        for vol in /Volumes/*/; do
+            [ -d "${vol}.Trashes" ] && sudo rm -rfv "${vol}.Trashes"
+        done
+        echo "Trash emptied."
+    else
+        echo "Aborted."
+    fi
+}
 
 # Update all the things
 alias update="brew update; brew upgrade; brew cleanup; npm update -g"

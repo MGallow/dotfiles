@@ -32,6 +32,7 @@ brew "ripgrep"  # Fast search tool
 cask "miniconda"
 
 # Applications
+cask "google-chrome"                # Primary browser
 cask "visual-studio-code-insiders"  # Primary editor (includes GitHub Copilot)
 cask "visual-studio-code"           # Backup editor
 cask "docker"
