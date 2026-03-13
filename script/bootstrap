@@ -35,8 +35,15 @@ setup_gitconfig() {
             git_credential='osxkeychain'
         fi
 
-        read -p 'What is your github author name? ' git_authorname
-        read -p 'What is your github author email? ' git_authoremail
+        # Non-interactive mode: honour environment variables (used by CI)
+        if [ -n "$GIT_AUTHOR_NAME" ] && [ -n "$GIT_AUTHOR_EMAIL" ]; then
+            git_authorname="$GIT_AUTHOR_NAME"
+            git_authoremail="$GIT_AUTHOR_EMAIL"
+            info "Using git identity from environment: $git_authorname <$git_authoremail>"
+        else
+            read -p 'What is your github author name? ' git_authorname
+            read -p 'What is your github author email? ' git_authoremail
+        fi
 
         # Use | as the sed delimiter to safely handle names/emails that contain /
         sed -e "s|AUTHOR_NAME|$git_authorname|g" \

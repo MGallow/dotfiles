@@ -375,6 +375,76 @@ All changes are reversible `defaults write` commands. No brick risk:
 
 ---
 
+## Testing
+
+### Quick health check (run after install)
+
+```bash
+./script/verify
+```
+
+Checks every major component and prints a clear pass/warn/fail summary:
+
+```
+Symlinks
+  ✓  ~/.zshrc → /Users/you/.dotfiles/zsh/zshrc.symlink
+  ✓  ~/.gitconfig → ...
+
+Core CLI tools
+  ✓  brew   /opt/homebrew/bin/brew
+  ✓  uv     /opt/homebrew/bin/uv
+  ✓  ruff   /opt/homebrew/bin/ruff
+
+GitHub CLI
+  ✓  gh 2.x.x
+  ✓  gh auth  Logged in to github.com
+  ✓  gh-copilot extension installed
+
+AI CLIs
+  ✓  claude  1.x.x
+  ✓  claude auth  authenticated
+  ✓  gemini  installed
+  ~  codex   not installed (optional)
+
+...
+──────────────────────────────────────────
+  ✓ 22 passed   ~ 1 warning
+──────────────────────────────────────────
+```
+
+Exit code `0` = all hard checks passed (warnings are expected for optional tools or auth state).
+
+### Continuous Integration (GitHub Actions)
+
+A CI workflow at `.github/workflows/test.yml` runs automatically on every push and pull request. It tests on a real `macos-latest` GitHub Actions runner:
+
+| Job | What it does |
+|-----|-------------|
+| **ShellCheck** | Lints all shell scripts for common errors and unsafe patterns |
+| **Full install (macOS)** | Runs `./script/bootstrap` + `./script/install` on a clean macOS VM, then verifies symlinks, Homebrew packages, Oh My Zsh, Python toolchain, and AI CLIs are all present |
+
+The CI uses `GIT_AUTHOR_NAME: "CI Test User"` and `GIT_AUTHOR_EMAIL: "ci@example.com"` as placeholder git identity — no real credentials are used or stored. Steps that require interactive browser auth (Claude, Gemini, GitHub CLI) are skipped gracefully in CI.
+
+You can watch runs at: `https://github.com/yourusername/dotfiles/actions`
+
+### Docker (Linux-only, partial)
+
+For a quick local sanity check of the shell script logic without a macOS VM:
+
+```bash
+docker run --rm -it \
+  -v "$(pwd)":/dotfiles \
+  -w /dotfiles \
+  ubuntu:24.04 \
+  bash -c "apt-get update -q && apt-get install -q -y git zsh curl && \
+           GIT_AUTHOR_NAME='Test' GIT_AUTHOR_EMAIL='test@test.com' \
+           bash script/bootstrap"
+```
+
+> Docker is Linux only — Homebrew, macOS defaults, and VS Code won't install. Useful for testing shell script syntax and symlink creation logic.
+
+---
+
 ## Restoring from a Mac Backup
 
 These scripts are designed to be **safe when run on a Mac that already has software installed** (e.g., migrated from a Time Machine backup or using Migration Assistant).
