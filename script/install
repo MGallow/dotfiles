@@ -73,15 +73,13 @@ info "Creating local config stubs"
 touch "$HOME/.zshrc.local"
 touch "$HOME/.gitconfig.local"
 
-# Seed .zshrc.local with API key placeholders if it's empty
+# Seed .zshrc.local with stubs if it's empty
 if [ ! -s "$HOME/.zshrc.local" ]; then
     cat >> "$HOME/.zshrc.local" <<'EOF'
 # ── AI API Keys ───────────────────────────────────────────────────────────────
-# Uncomment and fill in your keys. Never commit this file.
-
-# export ANTHROPIC_API_KEY=""   # Claude Code – https://console.anthropic.com
-# export GEMINI_API_KEY=""      # Gemini CLI  – https://aistudio.google.com/apikey
-# export OPENAI_API_KEY=""      # Codex / ChatGPT CLI – https://platform.openai.com/api-keys
+# Claude Code and Gemini CLI use browser-based sign-in — no key needed.
+# Codex CLI (OpenAI) requires an API key; add it here if using Codex.
+# export OPENAI_API_KEY=""      # https://platform.openai.com/api-keys
 
 # ── Local overrides ───────────────────────────────────────────────────────────
 EOF
@@ -94,8 +92,7 @@ echo ""
 echo "  Next steps:"
 echo "    1. Open a new terminal (or run: source ~/.zshrc)"
 echo "    2. Authenticate GitHub CLI:  gh auth login"
-echo "    3. Authenticate Claude Code: claude"
-echo "    4. Authenticate Gemini CLI:   gemini"
-echo "    5. Set Codex API key:         add OPENAI_API_KEY to ~/.zshrc.local"
-echo "    6. Add all AI API keys to ~/.zshrc.local for non-interactive use"
+echo "    3. Sign in to Claude Code:    claude  (browser opens automatically)"
+echo "    4. Sign in to Gemini CLI:     gemini  (browser opens automatically)"
+echo "    5. Codex (OpenAI) API key:    add OPENAI_API_KEY to ~/.zshrc.local"
 echo ""

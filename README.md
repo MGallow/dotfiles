@@ -52,11 +52,11 @@ cd ~/.dotfiles
 # 3. Install everything
 ./script/install
 
-# 4. Open a new terminal, then authenticate your AI tools
-gh auth login
-claude         # follow interactive auth
-gemini         # follow interactive auth
-# For Codex: add OPENAI_API_KEY to ~/.zshrc.local
+# 4. Open a new terminal, then sign in to your AI tools (all browser-based except Codex)
+gh auth login  # opens browser → GitHub OAuth
+claude         # opens browser → Anthropic sign-in
+gemini         # opens browser → Google sign-in
+# Codex only: add OPENAI_API_KEY="sk-..." to ~/.zshrc.local
 ```
 
 ---
@@ -154,13 +154,7 @@ ghce 'git rebase -i HEAD~3'                 # explain a command
 claude
 ```
 
-On first launch, Claude Code walks you through OAuth. Or set an API key in `~/.zshrc.local`:
-
-```bash
-export ANTHROPIC_API_KEY="sk-ant-..."
-```
-
-Get your key at <https://console.anthropic.com>.
+A browser window opens automatically for sign-in via your Anthropic Console account. No API key required.
 
 #### Gemini CLI
 
@@ -168,25 +162,18 @@ Get your key at <https://console.anthropic.com>.
 gemini
 ```
 
-Or set an API key in `~/.zshrc.local`:
-
-```bash
-export GEMINI_API_KEY="AIza..."
-```
-
-Get your key at <https://aistudio.google.com/apikey>.
+A browser window opens automatically for sign-in via your Google account. No API key required.
 
 #### OpenAI Codex CLI
 
-Add to `~/.zshrc.local`:
+Codex CLI doesn't support browser OAuth — it requires an API key. Add it to `~/.zshrc.local` (gitignored, never committed):
 
 ```bash
+# ~/.zshrc.local
 export OPENAI_API_KEY="sk-..."
 ```
 
-Then run `codex` to start an interactive session.
-
-Get your key at <https://platform.openai.com/api-keys>.
+Then run `codex`. Get your key at <https://platform.openai.com/api-keys>.
 
 ---
 

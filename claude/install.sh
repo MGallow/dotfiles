@@ -18,19 +18,12 @@ fi
 # Create Claude config directory
 mkdir -p "$HOME/.claude"
 
-# Remind user about API key setup
-if [ -z "$ANTHROPIC_API_KEY" ]; then
-    echo ""
-    echo "  ┌─────────────────────────────────────────────────────────────────┐"
-    echo "  │  Next step: Authenticate Claude Code                           │"
-    echo "  │                                                                 │"
-    echo "  │  Option 1 (recommended): Run 'claude' and follow the prompts   │"
-    echo "  │  Option 2: Add to ~/.zshrc.local:                              │"
-    echo "  │    export ANTHROPIC_API_KEY='your-api-key-here'                │"
-    echo "  │                                                                 │"
-    echo "  │  Get your API key at: https://console.anthropic.com            │"
-    echo "  └─────────────────────────────────────────────────────────────────┘"
-    echo ""
-fi
-
-echo "  Claude Code setup complete. Run 'claude' to start."
+echo ""
+echo "  ┌─────────────────────────────────────────────────────────────────┐"
+echo "  │  Next step: Authenticate Claude Code                           │"
+echo "  │                                                                 │"
+echo "  │  Run: claude                                                    │"
+echo "  │  A browser window will open to complete sign-in.               │"
+echo "  └─────────────────────────────────────────────────────────────────┘"
+echo ""
+echo "  Claude Code setup complete."
