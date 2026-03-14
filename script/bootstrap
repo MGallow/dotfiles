@@ -157,7 +157,8 @@ install_dotfiles
 create_env_file
 
 # If we're on a Mac, let's install and setup homebrew
-if [ "$(uname -s)" == "Darwin" ]; then
+# In CI, skip the full `bin/dot` run — the workflow calls each installer separately.
+if [ "$(uname -s)" == "Darwin" ] && [ -z "${DOTFILES_CI}" ]; then
     info "Installing dependencies"
     if . bin/dot > /tmp/dotfiles-dot 2>&1; then
         success "Dependencies installed"
