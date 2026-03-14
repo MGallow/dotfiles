@@ -6,6 +6,10 @@
 
 set -e
 
+# Resolve dotfiles root relative to this script so the Brewfile path works
+# whether or not $DOTFILES is already exported in the environment.
+DOTFILES="${DOTFILES:-$(cd "$(dirname "$0")/.." && pwd)}"
+
 # ── Homebrew ──────────────────────────────────────────────────────────────────
 if ! command -v brew &>/dev/null; then
     echo "  Installing Homebrew..."
