@@ -119,7 +119,11 @@ link_file() {
 install_dotfiles() {
     info 'Installing dotfiles'
 
+    # In CI, automatically overwrite existing files (runner may have a default ~/.gitconfig etc.)
     local overwrite_all=false backup_all=false skip_all=false
+    if [ -n "$DOTFILES_CI" ]; then
+        overwrite_all=true
+    fi
 
     # First, add .dotfiles to the path
     echo "export DOTFILES=$DOTFILES_ROOT" > /tmp/dotfilespath
@@ -153,7 +157,8 @@ install_dotfiles
 create_env_file
 
 # If we're on a Mac, let's install and setup homebrew
-if [ "$(uname -s)" == "Darwin" ]; then
+# In CI, skip the full `bin/dot` run — the workflow calls each installer separately.
+if [ "$(uname -s)" == "Darwin" ] && [ -z "${DOTFILES_CI}" ]; then
     info "Installing dependencies"
     if . bin/dot > /tmp/dotfiles-dot 2>&1; then
         success "Dependencies installed"

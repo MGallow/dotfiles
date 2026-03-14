@@ -5,6 +5,10 @@
 
 set -e
 
+# Resolve dotfiles root relative to this script so template paths work
+# whether or not $DOTFILES is already exported in the environment.
+DOTFILES="${DOTFILES:-$(cd "$(dirname "$0")/.." && pwd)}"
+
 echo "› Setting up Python development environment..."
 
 # ── Miniconda ─────────────────────────────────────────────────────────────────

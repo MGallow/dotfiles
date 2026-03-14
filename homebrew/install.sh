@@ -6,6 +6,10 @@
 
 set -e
 
+# Resolve dotfiles root relative to this script so the Brewfile path works
+# whether or not $DOTFILES is already exported in the environment.
+DOTFILES="${DOTFILES:-$(cd "$(dirname "$0")/.." && pwd)}"
+
 # ── Homebrew ──────────────────────────────────────────────────────────────────
 if ! command -v brew &>/dev/null; then
     echo "  Installing Homebrew..."
@@ -26,6 +30,11 @@ brew update
 # `--no-upgrade` means: install missing packages but don't upgrade ones that are
 # already present (important when restoring from a backup — avoids mass upgrades).
 # Run `brew upgrade` separately or via `dot update` when you want to upgrade.
-brew bundle install --file="$DOTFILES/Brewfile" --no-upgrade
+if [[ "${DOTFILES_CI:-}" == "1" ]]; then
+    echo "  CI mode: skipping casks and mas (formulae only)"
+    brew bundle install --file="$DOTFILES/Brewfile" --no-upgrade --no-lock --no-cask --no-mas
+else
+    brew bundle install --file="$DOTFILES/Brewfile" --no-upgrade
+fi
 
 brew cleanup
