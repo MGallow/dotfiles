@@ -37,6 +37,8 @@ Before you begin, make sure you have:
 
 3. **A GitHub account** — needed for `gh auth login` and GitHub Copilot
 
+> `script/bootstrap` runs `script/validate` automatically before touching anything. It checks macOS version, Xcode CLT, disk space (5 GB+), and network access, and exits with a clear message if a hard requirement isn't met. You can also run it standalone: `./script/validate`
+
 ---
 
 ## Quick Start (TL;DR)
@@ -46,17 +48,32 @@ Before you begin, make sure you have:
 git clone https://github.com/yourusername/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 
-# 2. Create symlinks and prompt for Git identity
-./script/bootstrap
+# 2. (Optional) Preview what bootstrap will do without making any changes
+make dry-run
 
-# 3. Install everything
-./script/install
+# 3. Create symlinks and prompt for Git identity
+make bootstrap
 
-# 4. Open a new terminal, then sign in to your AI tools (all browser-based except Codex)
+# 4. Install everything
+make install
+
+# 5. Open a new terminal, then sign in to your AI tools (all browser-based except Codex)
 gh auth login  # opens browser → GitHub OAuth
 claude         # opens browser → Anthropic sign-in
 gemini         # opens browser → Google sign-in
 # Codex only: add OPENAI_API_KEY="sk-..." to ~/.zshrc.local
+```
+
+All Makefile targets:
+
+```text
+make help        # show all targets
+make bootstrap   # create symlinks + gitconfig (first-time setup)
+make install     # install all packages and tools
+make verify      # health-check the installation
+make update      # update Homebrew, AI tools, Oh My Zsh, etc.
+make unlink      # remove all managed symlinks (reverse of bootstrap)
+make dry-run     # preview bootstrap without touching anything
 ```
 
 ---
@@ -77,25 +94,35 @@ cd ~/.dotfiles
 ### Step 2 — Run the bootstrap script
 
 ```bash
-./script/bootstrap
+make bootstrap
+# or: ./script/bootstrap
 ```
 
-This will:
-- Prompt you for your **Git author name and email** (stored in `~/.gitconfig.local`, which is gitignored)
-- Create **symlinks** from your home directory to the dotfiles:
+Bootstrap first runs `script/validate` to check prerequisites (macOS version, Xcode CLT, disk space, network), then:
+
+- Prompts you for your **Git author name and email** (stored in `~/.gitconfig.local`, which is gitignored)
+- Creates **symlinks** from your home directory to the dotfiles:
   - `~/.zshrc` → `zsh/zshrc.symlink`
   - `~/.gitconfig` → `git/gitconfig.symlink`
   - `~/.gitignore` → `git/gitignore.symlink`
   - `~/.vimrc` → `vim/vimrc.symlink`
   - `~/.tmux.conf` → `tmux/tmux.conf.symlink`
-- Back up any existing conflicting files to `~/.dotfiles_backup/`
+- Backs up any existing conflicting files to `~/.dotfiles_backup/`
+
+**Dry run** — preview exactly what would be linked/overwritten without touching anything:
+
+```bash
+make dry-run
+# or: ./script/bootstrap --dry-run
+```
 
 ---
 
 ### Step 3 — Install everything
 
 ```bash
-./script/install
+make install
+# or: ./script/install
 ```
 
 This runs the full installation in order:
@@ -310,12 +337,25 @@ alias work='cd ~/work/mycompany'
 
 ### Adding a new topic
 
-```
+```text
 mytool/
-├── install.sh        # Runs during ./script/install
-├── aliases.zsh       # Sourced into every shell session
+├── install.sh           # Runs during ./script/install
+├── install.priority     # Optional: install order (integer, lower = earlier, default 50)
+├── aliases.zsh          # Sourced into every shell session
 └── mytool.conf.symlink  # Symlinked to ~/.mytool.conf
 ```
+
+The install order is controlled by `install.priority` files — no edits to `script/install` needed. The built-in priorities are:
+
+| Topic                    | Priority     |
+|--------------------------|--------------|
+| zsh                      | 10           |
+| python                   | 20           |
+| vscode                   | 30           |
+| github                   | 40           |
+| claude / gemini / openai | 50 (default) |
+
+Topics without an `install.priority` file default to 50 and run in filesystem order relative to other 50s.
 
 ---
 
@@ -324,7 +364,8 @@ mytool/
 ### Update everything
 
 ```bash
-dot update
+make update
+# or: dot update
 ```
 
 Updates: Homebrew packages, Oh My Zsh, dotfiles repo, Claude Code, Gemini CLI, Codex CLI, uv, gh extensions, and VS Code extensions.
@@ -334,6 +375,15 @@ Updates: Homebrew packages, Oh My Zsh, dotfiles repo, Claude Code, Gemini CLI, C
 ```bash
 dot --edit    # opens ~/.dotfiles in VS Code Insiders
 ```
+
+### Remove all symlinks
+
+```bash
+make unlink
+# or: ./script/unlink
+```
+
+Removes every symlink that points into `~/.dotfiles` and restores any `.backup` files created during bootstrap. Does not uninstall packages. Supports `--dry-run` to preview first.
 
 ---
 
@@ -416,14 +466,18 @@ Exit code `0` = all hard checks passed (warnings are expected for optional tools
 
 ### Continuous Integration (GitHub Actions)
 
-A CI workflow at `.github/workflows/test.yml` runs automatically on every push and pull request. It tests on a real `macos-latest` GitHub Actions runner:
+A CI workflow at [.github/workflows/test.yml](.github/workflows/test.yml) runs automatically on every push and pull request:
 
-| Job | What it does |
-|-----|-------------|
-| **ShellCheck** | Lints all shell scripts for common errors and unsafe patterns |
-| **Full install (macOS)** | Runs `./script/bootstrap` + `./script/install` on a clean macOS VM, then verifies symlinks, Homebrew packages, Oh My Zsh, Python toolchain, and AI CLIs are all present |
+| Job                                        | What it does                                                                              |
+|--------------------------------------------|-------------------------------------------------------------------------------------------|
+| **Gitleaks**                               | Scans the full git history for accidentally committed secrets                             |
+| **ShellCheck**                             | Lints all shell scripts for common errors and unsafe patterns                             |
+| **Full install (macOS 14 — Sonoma/arm64)** | Runs the complete install on Apple Silicon                                                |
+| **Full install (macOS 13 — Ventura/intel)**| Runs the complete install on Intel — both legs run even if one fails (`fail-fast: false`) |
 
-The CI uses `GIT_AUTHOR_NAME: "CI Test User"` and `GIT_AUTHOR_EMAIL: "ci@example.com"` as placeholder git identity — no real credentials are used or stored. Steps that require interactive browser auth (Claude, Gemini, GitHub CLI) are skipped gracefully in CI.
+Each macOS install job runs: `script/validate` → `script/bootstrap` → symlink verification → Homebrew → Oh My Zsh → Python → AI CLIs → `script/unlink --dry-run` → `script/verify`.
+
+The CI uses `GIT_AUTHOR_NAME: "CI Test User"` and `GIT_AUTHOR_EMAIL: "ci@example.com"` as placeholder git identity — no real credentials are used or stored. Steps that require interactive browser auth (Claude, Gemini, GitHub CLI) are skipped gracefully via `DOTFILES_CI=1`.
 
 You can watch runs at: `https://github.com/yourusername/dotfiles/actions`
 
