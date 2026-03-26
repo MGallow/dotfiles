@@ -1,6 +1,3 @@
-# Taps
-tap "homebrew/bundle"
-
 # Development tools
 brew "git"
 brew "git-lfs"  # Git Large File Storage
