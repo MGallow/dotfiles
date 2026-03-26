@@ -32,7 +32,11 @@ brew update
 # Run `brew upgrade` separately or via `dot update` when you want to upgrade.
 if [[ "${DOTFILES_CI:-}" == "1" ]]; then
     echo "  CI mode: skipping casks and mas (formulae only)"
-    brew bundle install --file="$DOTFILES/Brewfile" --no-upgrade --no-cask --no-mas
+    # brew bundle install has no --no-cask flag; filter to tap/brew lines only
+    CI_BREWFILE="$(mktemp)"
+    grep -E '^(tap|brew) ' "$DOTFILES/Brewfile" > "$CI_BREWFILE"
+    brew bundle install --file="$CI_BREWFILE" --no-upgrade
+    rm -f "$CI_BREWFILE"
 else
     brew bundle install --file="$DOTFILES/Brewfile" --no-upgrade
 fi
