@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+#
+# Remove all dotfile symlinks created by script/bootstrap.
+# If a .backup file exists for a link, it is restored automatically.
+#
+# Usage:
+#   ./script/unlink            # Remove symlinks, restore backups if present
+#   ./script/unlink --dry-run  # Preview without making changes
+
+set -e
+
+DOTFILES_ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"
+DRY_RUN=false
+
+for arg in "$@"; do
+    case "$arg" in
+        -n|--dry-run) DRY_RUN=true ;;
+    esac
+done
+
+green='\033[0;32m'; yellow='\033[0;33m'; reset='\033[0m'
+ok()   { printf "  ${green}✓${reset}  %s\n" "$1"; }
+info() { printf "  ${yellow}→${reset}  %s\n" "$1"; }
+
+printf "\nRemoving dotfile symlinks...\n\n"
+
+removed=0
+
+while IFS= read -r src; do
+    dst="$HOME/.$(basename "${src%.*}")"
+
+    # Not a symlink — skip (could be a real file the user put there)
+    if [ ! -L "$dst" ]; then
+        continue
+    fi
+
+    # Only remove if it points into our dotfiles directory
+    link_target="$(readlink "$dst")"
+    case "$link_target" in
+        "$DOTFILES_ROOT"*) ;;  # matches — proceed
+        *) info "skipped $dst (points elsewhere: $link_target)"; continue ;;
+    esac
+
+    if [ "$DRY_RUN" = "true" ]; then
+        if [ -f "${dst}.backup" ]; then
+            ok "[dry-run] would remove $dst and restore ${dst}.backup"
+        else
+            ok "[dry-run] would remove $dst"
+        fi
+    else
+        rm "$dst"
+        if [ -f "${dst}.backup" ]; then
+            mv "${dst}.backup" "$dst"
+            ok "removed $dst — restored from backup"
+        else
+            ok "removed $dst"
+        fi
+    fi
+    removed=$((removed + 1))
+done < <(find -H "$DOTFILES_ROOT" -maxdepth 2 -name '*.symlink' -not -path '*/.git/*')
+
+printf "\n"
+if [ "$DRY_RUN" = "true" ]; then
+    printf "  Dry run complete. %d symlink(s) would be removed.\n\n" "$removed"
+else
+    printf "  Done. %d symlink(s) removed.\n\n" "$removed"
+fi
