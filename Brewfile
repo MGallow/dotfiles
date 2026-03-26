@@ -7,7 +7,7 @@ brew "git-gui"          # Tcl/Tk UI for the git revision control system
 brew "tmux"
 brew "vim"
 brew "zsh"
-brew "node"             # Required for Claude Code, Gemini CLI, and Codex CLI
+brew "node"             # Required for Claude Code, Gemini CLI, and Codex CLI (all installed via npm)
 brew "python"
 
 # Python toolchain
@@ -44,7 +44,6 @@ brew "hugo"             # Fast, flexible static site generator
 brew "hunspell"         # Spell checker and morphological analyzer
 
 # Development utilities
-brew "codex"            # AI coding assistant CLI
 brew "kubernetes-cli"   # Kubernetes command-line tool
 brew "shellcheck"       # Shell script static analysis tool
 brew "colima"           # Lightweight container runtime (Docker Desktop alternative)
