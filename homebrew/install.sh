@@ -2,7 +2,7 @@
 #
 # Install Homebrew and all packages from the Brewfile.
 # Safe to re-run: skips installation if already present, uses `brew bundle --no-upgrade`
-# on first install so an existing Mac backup isn't mass-upgraded unexpectedly.
+# on non-CI runs so an existing Mac backup isn't mass-upgraded unexpectedly.
 
 set -e
 
@@ -39,7 +39,7 @@ if [[ "${DOTFILES_CI:-}" == "1" ]]; then
     # Parsing the Brewfile ourselves and calling brew install avoids that entirely.
     grep -E '^brew ' "$DOTFILES/Brewfile" \
         | sed 's/brew "\([^"]*\)".*/\1/' \
-        | xargs brew install --formula --no-upgrade 2>&1
+        | xargs brew install --formula 2>&1
 else
     brew bundle install --file="$DOTFILES/Brewfile" --no-upgrade
 fi
