@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+#
+# Validate that the system meets dotfiles prerequisites.
+# Called automatically by script/bootstrap. Can also be run standalone.
+# Exit 0 = all checks pass. Exit 1 = a hard requirement is not met.
+#
+# Note: intentionally no 'set -e' — we accumulate errors across all checks
+# before deciding whether to abort, so partial failures must not exit early.
+
+green='\033[0;32m'; red='\033[0;31m'; yellow='\033[0;33m'; reset='\033[0m'
+ok()   { printf "  ${green}✓${reset}  %s\n" "$1"; }
+fail() { printf "  ${red}✗${reset}  %s\n" "$1"; }
+warn() { printf "  ${yellow}~${reset}  %s\n" "$1"; }
+
+HARD_FAIL=0
+
+printf "\nValidating system prerequisites...\n\n"
+
+# ── macOS version ─────────────────────────────────────────────────────────────
+if [ "$(uname -s)" = "Darwin" ]; then
+    macos_version="$(sw_vers -productVersion)"
+    macos_major="$(printf '%s' "$macos_version" | cut -d. -f1)"
+    if [ "$macos_major" -ge 13 ]; then
+        ok "macOS $macos_version"
+    elif [ "$macos_major" -ge 12 ]; then
+        warn "macOS $macos_version — Monterey is supported but Ventura (13+) is recommended"
+    else
+        fail "macOS $macos_version — requires macOS 12 (Monterey) or newer"
+        HARD_FAIL=$((HARD_FAIL + 1))
+    fi
+else
+    warn "Non-macOS system — some steps may not apply"
+fi
+
+# ── Xcode Command Line Tools ──────────────────────────────────────────────────
+if xcode_path="$(xcode-select -p 2>/dev/null)"; then
+    ok "Xcode Command Line Tools  $xcode_path"
+else
+    fail "Xcode Command Line Tools not installed — run: xcode-select --install"
+    HARD_FAIL=$((HARD_FAIL + 1))
+fi
+
+# ── git ───────────────────────────────────────────────────────────────────────
+if command -v git &>/dev/null; then
+    ok "git  $(git --version)"
+else
+    fail "git not found — install Xcode Command Line Tools first"
+    HARD_FAIL=$((HARD_FAIL + 1))
+fi
+
+# ── Disk space (at least 5 GB free) ──────────────────────────────────────────
+free_kb="$(df -k "$HOME" | awk 'NR==2{print $4}')"
+free_gb=$((free_kb / 1024 / 1024))
+if [ "$free_gb" -ge 5 ]; then
+    ok "Disk space  ${free_gb} GB free"
+else
+    warn "Disk space  ${free_gb} GB free — 5+ GB recommended (Homebrew + conda take ~3 GB)"
+fi
+
+# ── Network connectivity ──────────────────────────────────────────────────────
+if curl -fsS --max-time 5 https://github.com &>/dev/null; then
+    ok "Network  github.com reachable"
+else
+    warn "Network  cannot reach github.com — install may fail on downloads"
+fi
+
+printf "\n"
+
+if [ "$HARD_FAIL" -gt 0 ]; then
+    printf "  ${red}✗${reset}  %d hard requirement(s) not met. Fix above before running bootstrap.\n\n" "$HARD_FAIL"
+    exit 1
+fi
+
+printf "  ${green}✓${reset}  All prerequisites met.\n\n"
+exit 0

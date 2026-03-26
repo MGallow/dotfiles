@@ -7,6 +7,9 @@ export DOTFILES="$DOTFILES_ROOT"
 
 set -e
 
+# ── Pre-flight validation ──────────────────────────────────────────────────────
+"$(cd "$(dirname "$0")" && pwd)/validate"
+
 echo ''
 
 info() {
