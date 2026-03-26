@@ -5,6 +5,13 @@
 DOTFILES_ROOT=$(pwd -P)
 export DOTFILES="$DOTFILES_ROOT"
 
+DRY_RUN=false
+for arg in "$@"; do
+    case "$arg" in
+        -n|--dry-run) DRY_RUN=true ;;
+    esac
+done
+
 set -e
 
 # ── Pre-flight validation ──────────────────────────────────────────────────────
@@ -100,13 +107,21 @@ link_file() {
         skip=${skip:-$skip_all}
 
         if [ "$overwrite" == "true" ]; then
-            rm -rf "$dst"
-            success "removed $dst"
+            if [ "$DRY_RUN" = "true" ]; then
+                success "[dry-run] would remove $dst"
+            else
+                rm -rf "$dst"
+                success "removed $dst"
+            fi
         fi
 
         if [ "$backup" == "true" ]; then
-            mv "$dst" "${dst}.backup"
-            success "moved $dst to ${dst}.backup"
+            if [ "$DRY_RUN" = "true" ]; then
+                success "[dry-run] would backup $dst to ${dst}.backup"
+            else
+                mv "$dst" "${dst}.backup"
+                success "moved $dst to ${dst}.backup"
+            fi
         fi
 
         if [ "$skip" == "true" ]; then
@@ -115,8 +130,12 @@ link_file() {
     fi
 
     if [ "$skip" != "true" ]; then
-        ln -s "$1" "$2"
-        success "linked $1 to $2"
+        if [ "$DRY_RUN" = "true" ]; then
+            success "[dry-run] would link $1 to $2"
+        else
+            ln -s "$1" "$2"
+            success "linked $1 to $2"
+        fi
     fi
 }
 
@@ -158,7 +177,7 @@ create_env_file
 
 # If we're on a Mac, let's install and setup homebrew
 # In CI, skip the full `bin/dot` run — the workflow calls each installer separately.
-if [ "$(uname -s)" == "Darwin" ] && [ -z "${DOTFILES_CI}" ]; then
+if [ "$(uname -s)" == "Darwin" ] && [ -z "${DOTFILES_CI}" ] && [ "$DRY_RUN" = "false" ]; then
     info "Installing dependencies"
     if . bin/dot > /tmp/dotfiles-dot 2>&1; then
         success "Dependencies installed"
