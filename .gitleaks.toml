@@ -1,0 +1,15 @@
+# gitleaks configuration
+# https://github.com/gitleaks/gitleaks
+
+title = "dotfiles gitleaks config"
+
+[allowlist]
+  description = "Allowlisted patterns that are intentional placeholders"
+  regexes = [
+    # Template placeholders in gitconfig
+    '''AUTHOR_NAME''',
+    '''AUTHOR_EMAIL''',
+    '''GIT_CREDENTIAL_HELPER''',
+    # CI test values
+    '''ci@example\.com''',
+  ]

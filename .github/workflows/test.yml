@@ -7,6 +7,23 @@ on:
     branches: [main, master]
 
 jobs:
+  # ── Secret scanning ─────────────────────────────────────────────────────────
+  gitleaks:
+    name: Gitleaks secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history so gitleaks can scan all commits
+
+      - name: Install gitleaks
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_$(uname -s | tr '[:upper:]' '[:lower:]')_x64.tar.gz \
+            | tar -xz -C /usr/local/bin gitleaks
+
+      - name: Run gitleaks
+        run: gitleaks detect --source . --redact --no-git=false
+
   # ── Shell script linting ────────────────────────────────────────────────────
   shellcheck:
     name: ShellCheck
@@ -24,14 +41,20 @@ jobs:
             -print0 | xargs -0 shellcheck --severity=warning || true
 
           # Lint scripts without extensions by checking the shebang line
-          for f in script/bootstrap script/install script/verify bin/dot bin/c bin/e bin/zssh; do
+          for f in script/bootstrap script/install script/validate script/unlink script/verify bin/dot bin/c bin/e bin/zssh; do
             [ -f "$f" ] && shellcheck --severity=warning "$f" || true
           done
 
   # ── Full macOS install test ─────────────────────────────────────────────────
   install-macos:
-    name: Full install (macOS)
-    runs-on: macos-latest
+    name: Full install (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-14   # Sonoma  — Apple Silicon (M-series runner)
+          - macos-13   # Ventura — Intel runner
     env:
       # Non-interactive git config (read by script/bootstrap)
       GIT_AUTHOR_NAME: "CI Test User"
@@ -50,6 +73,11 @@ jobs:
           mkdir -p "$HOME"
           ln -sfn "$GITHUB_WORKSPACE/.dotfiles" "$HOME/.dotfiles"
 
+      - name: Run validate (pre-bootstrap checks)
+        run: |
+          cd "$HOME/.dotfiles"
+          ./script/validate
+
       - name: Run bootstrap (creates symlinks + gitconfig)
         run: |
           cd "$HOME/.dotfiles"
@@ -59,9 +87,9 @@ jobs:
         run: |
           for link in ~/.zshrc ~/.gitconfig ~/.gitignore ~/.vimrc ~/.tmux.conf; do
             if [ -L "$link" ]; then
-              echo "✓ $link → $(readlink "$link")"
+              echo "ok $link -> $(readlink "$link")"
             else
-              echo "✗ $link not a symlink" && exit 1
+              echo "fail: $link not a symlink" && exit 1
             fi
           done
 
@@ -74,24 +102,23 @@ jobs:
         run: |
           for tool in git git-lfs node uv gh fzf rg bat eza; do
             if command -v "$tool" &>/dev/null; then
-              echo "✓ $tool"
+              echo "ok $tool"
             else
-              echo "✗ $tool not found" && exit 1
+              echo "fail: $tool not found" && exit 1
             fi
           done
 
       - name: Install Oh My Zsh + plugins
         run: |
-          # Run zsh installer (RUNZSH=no prevents shell replacement)
           RUNZSH=no CHSH=no bash "$HOME/.dotfiles/zsh/install.sh"
 
       - name: Verify Oh My Zsh
         run: |
-          [ -d "$HOME/.oh-my-zsh" ] && echo "✓ oh-my-zsh" || (echo "✗ oh-my-zsh missing" && exit 1)
+          [ -d "$HOME/.oh-my-zsh" ] && echo "ok oh-my-zsh" || (echo "fail: oh-my-zsh missing" && exit 1)
           [ -d "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions" ] && \
-            echo "✓ zsh-autosuggestions" || (echo "✗ zsh-autosuggestions missing" && exit 1)
+            echo "ok zsh-autosuggestions" || (echo "fail: zsh-autosuggestions missing" && exit 1)
           [ -d "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ] && \
-            echo "✓ zsh-syntax-highlighting" || (echo "✗ zsh-syntax-highlighting missing" && exit 1)
+            echo "ok zsh-syntax-highlighting" || (echo "fail: zsh-syntax-highlighting missing" && exit 1)
 
       - name: Install Python environment
         run: |
@@ -102,9 +129,9 @@ jobs:
           for tool in conda uv; do
             if command -v "$tool" &>/dev/null || \
                [ -f "/opt/homebrew/Caskroom/miniconda/base/bin/$tool" ]; then
-              echo "✓ $tool"
+              echo "ok $tool"
             else
-              echo "⚠ $tool not on PATH (may need shell reload)"
+              echo "warn: $tool not on PATH (may need shell reload)"
             fi
           done
 
@@ -118,25 +145,28 @@ jobs:
         run: |
           for tool in claude gemini codex; do
             if command -v "$tool" &>/dev/null; then
-              echo "✓ $tool"
+              echo "ok $tool"
             else
-              echo "✗ $tool not found" && exit 1
+              echo "fail: $tool not found" && exit 1
             fi
           done
 
       - name: Install GitHub CLI Copilot extension
         run: |
-          # gh auth is not available in CI, so just check the extension install command works
           bash "$HOME/.dotfiles/github/install.sh" || true
 
       - name: Install VS Code extensions
-        # VS Code Insiders may not be installed on the runner; skip gracefully
         run: |
           if command -v code-insiders &>/dev/null || command -v code &>/dev/null; then
             bash "$HOME/.dotfiles/vscode/install.sh" || true
           else
-            echo "VS Code not installed on runner — skipping extension install"
+            echo "VS Code not installed on runner — skipping"
           fi
+
+      - name: Test script/unlink --dry-run
+        run: |
+          cd "$HOME/.dotfiles"
+          ./script/unlink --dry-run
 
       - name: Create local config stubs
         run: |
@@ -146,5 +176,3 @@ jobs:
       - name: Run verify script
         run: |
           bash "$HOME/.dotfiles/script/verify" || true
-          # In CI some warnings are expected (no gh auth, no browser-based claude/gemini auth)
-          # The verify script returns non-zero only on hard failures; warnings are OK
