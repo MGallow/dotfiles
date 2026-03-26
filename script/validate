@@ -71,5 +71,5 @@ if [ "$HARD_FAIL" -gt 0 ]; then
     exit 1
 fi
 
-printf "  ${green}✓${reset}  All prerequisites met.\n\n"
+printf "  %b✓%b  All prerequisites met.\n\n" "$green" "$reset"
 exit 0
