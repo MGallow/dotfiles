@@ -30,6 +30,10 @@ fi
 # ── Brewfile ──────────────────────────────────────────────────────────────────
 brew update
 
+# Older Homebrew versions (<4.0) auto-tap homebrew/bundle which is now
+# deprecated and causes bundle installs to fail. Remove it pre-emptively.
+brew untap homebrew/bundle 2>/dev/null || true
+
 # `--no-upgrade` means: install missing packages but don't upgrade ones that are
 # already present (important when restoring from a backup — avoids mass upgrades).
 # Run `brew upgrade` separately or via `dot update` when you want to upgrade.
