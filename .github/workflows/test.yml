@@ -55,14 +55,16 @@ jobs:
       fail-fast: false
       matrix:
         os:
+          - macos-15   # Sequoia — Apple Silicon (M-series runner)
           - macos-14   # Sonoma  — Apple Silicon (M-series runner)
-          - macos-13   # Ventura — Intel runner
     env:
       # Non-interactive git config (read by script/bootstrap)
       GIT_AUTHOR_NAME: "CI Test User"
       GIT_AUTHOR_EMAIL: "ci@example.com"
       # Skip tools that require interactive browser auth or paid subscriptions
       DOTFILES_CI: "1"
+      # Opt into Node.js 24 for actions (Node.js 20 deprecated June 2026)
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
     steps:
       - name: Checkout dotfiles
