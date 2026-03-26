@@ -3,6 +3,7 @@
 # Bootstrap script for setting up a new macOS system with dotfiles
 
 DOTFILES_ROOT=$(pwd -P)
+export DOTFILES="$DOTFILES_ROOT"
 
 set -e
 
@@ -124,10 +125,6 @@ install_dotfiles() {
     if [ -n "$DOTFILES_CI" ]; then
         overwrite_all=true
     fi
-
-    # First, add .dotfiles to the path
-    echo "export DOTFILES=$DOTFILES_ROOT" > /tmp/dotfilespath
-    source /tmp/dotfilespath
 
     for src in $(find -H "$DOTFILES_ROOT" -maxdepth 2 -name '*.symlink' -not -path '*.git*'); do
         dst="$HOME/.$(basename "${src%.*}")"
