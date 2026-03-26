@@ -21,32 +21,37 @@ info "Installing Oh My Zsh and plugins"
 bash "${DOTFILES:-$HOME/.dotfiles}/zsh/install.sh"
 success "Oh My Zsh and plugins ready"
 
-# ── 4. Topic installers (ordered) ────────────────────────────────────────────
-# Run topic-specific install.sh files (skip script/ directory itself).
-# GitHub comes before Claude/Gemini because those check for `npm` (from brew).
-for topic in zsh python vscode github claude gemini openai; do
-    installer="$HOME/.dotfiles/$topic/install.sh"
-    if [ -f "$installer" ]; then
-        info "Running $topic installer"
-        bash "$installer"
-        success "$topic setup complete"
-    fi
-done
+# ── 4. Topic installers (priority-ordered) ───────────────────────────────────
+# Topics with an install.priority file run in that order (lower = earlier).
+# Topics without one default to priority 50. Adding a new topic requires
+# only an install.sh in its directory; no edits to this file are needed.
+info "Running topic installers"
 
-# Run any remaining install.sh files not covered above
-find . -name install.sh \
+tmp_list=$(mktemp)
+
+while IFS= read -r installer; do
+    topic_dir="$(dirname "$installer")"
+    priority_file="$topic_dir/install.priority"
+    if [ -f "$priority_file" ]; then
+        priority="$(cat "$priority_file")"
+    else
+        priority=50
+    fi
+    printf '%s %s\n' "$priority" "$installer" >> "$tmp_list"
+done < <(find . -maxdepth 2 -name install.sh \
     -not -path "./script/*" \
-    -not -path "./zsh/*" \
-    -not -path "./python/*" \
-    -not -path "./vscode/*" \
-    -not -path "./github/*" \
-    -not -path "./claude/*" \
-    -not -path "./gemini/*" \
-    -not -path "./openai/*" \
-    | while read -r installer; do
-        info "Running ${installer}..."
-        bash "${installer}"
-    done
+    -not -path "./homebrew/*")
+
+while IFS= read -r line; do
+    installer="${line#* }"
+    priority="${line%% *}"
+    topic="$(basename "$(dirname "$installer")")"
+    info "Running $topic installer (priority $priority)"
+    bash "$installer"
+    success "$topic setup complete"
+done < <(sort -n "$tmp_list")
+
+rm -f "$tmp_list"
 
 # ── 5. macOS defaults ─────────────────────────────────────────────────────────
 if [ "$(uname -s)" = "Darwin" ]; then
