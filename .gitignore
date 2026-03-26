@@ -58,6 +58,9 @@ node_modules/
 npm-debug.log*
 package-lock.json
 
+# ── Git worktrees ─────────────────────────────────────────────────────────────
+.worktrees/
+
 # ── Editor directories ────────────────────────────────────────────────────────
 .idea/
 .vscode/
