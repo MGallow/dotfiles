@@ -30,20 +30,16 @@ fi
 # ── Brewfile ──────────────────────────────────────────────────────────────────
 brew update
 
-# Older Homebrew versions (<4.0) auto-tap homebrew/bundle which is now
-# deprecated and causes bundle installs to fail. Remove it pre-emptively.
-brew untap homebrew/bundle 2>/dev/null || true
-
 # `--no-upgrade` means: install missing packages but don't upgrade ones that are
 # already present (important when restoring from a backup — avoids mass upgrades).
 # Run `brew upgrade` separately or via `dot update` when you want to upgrade.
 if [[ "${DOTFILES_CI:-}" == "1" ]]; then
-    echo "  CI mode: skipping casks and mas (formulae only)"
-    # brew bundle install has no --no-cask flag; filter to tap/brew lines only
-    CI_BREWFILE="$(mktemp)"
-    grep -E '^(tap|brew) ' "$DOTFILES/Brewfile" > "$CI_BREWFILE"
-    brew bundle install --file="$CI_BREWFILE" --no-upgrade
-    rm -f "$CI_BREWFILE"
+    echo "  CI mode: installing formulae directly (skipping brew bundle to avoid tap issues)"
+    # brew bundle triggers a deprecated homebrew/bundle tap on some Homebrew versions.
+    # Parsing the Brewfile ourselves and calling brew install avoids that entirely.
+    grep -E '^brew ' "$DOTFILES/Brewfile" \
+        | sed 's/brew "\([^"]*\)".*/\1/' \
+        | xargs brew install --formula --no-upgrade 2>&1
 else
     brew bundle install --file="$DOTFILES/Brewfile" --no-upgrade
 fi
