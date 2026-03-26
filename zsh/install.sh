@@ -9,6 +9,9 @@ if [ ! -d "$HOME/.oh-my-zsh" ]; then
     echo "  Installing Oh My Zsh..."
     # RUNZSH=no prevents Oh My Zsh from immediately replacing the current shell
     # CHSH=no prevents it from attempting to change the default shell (we do that manually)
+    # Security note: This runs the official Oh My Zsh installer directly from GitHub.
+    # Source: https://github.com/ohmyzsh/ohmyzsh/blob/master/tools/install.sh
+    # Alternative: clone the repo manually and run tools/install.sh locally.
     RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 

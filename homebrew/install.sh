@@ -13,6 +13,9 @@ DOTFILES="${DOTFILES:-$(cd "$(dirname "$0")/.." && pwd)}"
 # ── Homebrew ──────────────────────────────────────────────────────────────────
 if ! command -v brew &>/dev/null; then
     echo "  Installing Homebrew..."
+    # Security note: This runs the official Homebrew installer from GitHub.
+    # Source: https://github.com/Homebrew/install/blob/HEAD/install.sh
+    # Alternative: follow manual instructions at https://brew.sh
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
     # Apple Silicon: add brew to PATH for this session and persist to .zprofile
