@@ -54,11 +54,8 @@ done < <(sort -n "$tmp_list")
 rm -f "$tmp_list"
 
 # ── 5. macOS defaults ─────────────────────────────────────────────────────────
-if [ "$(uname -s)" = "Darwin" ]; then
-    info "Setting macOS defaults"
-    "$HOME/.dotfiles/macos/set-defaults.sh"
-    success "macOS defaults applied"
-fi
+# Not run automatically — use `make defaults` to apply intentionally.
+# This preserves settings restored from a macOS backup.
 
 # ── 6. Local config stubs ─────────────────────────────────────────────────────
 info "Creating local config stubs"

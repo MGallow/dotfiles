@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 #
-# Sensible macOS defaults — consolidated from bin/set-defaults and macos/set-defaults.sh
+# macOS defaults — reflects Matt's actual preferences.
+# Run manually: make defaults
+# NOT called automatically by make install or make bootstrap.
 
-# Close any open System Preferences panes
-osascript -e 'tell application "System Preferences" to quit'
+# Close any open System Settings panes
+osascript -e 'tell application "System Settings" to quit'
 
 # Ask for the administrator password upfront
 sudo -v
@@ -18,11 +20,8 @@ trap 'kill "$SUDO_KEEPALIVE_PID" 2>/dev/null' EXIT
 # General UI/UX                                                               #
 ###############################################################################
 
-# Set sidebar icon size to medium
-defaults write NSGlobalDomain NSTableViewDefaultSizeMode -int 2
-
-# Always show scrollbars
-defaults write NSGlobalDomain AppleShowScrollBars -string "Always"
+# Set sidebar icon size to small
+defaults write NSGlobalDomain NSTableViewDefaultSizeMode -int 1
 
 # Expand save panel by default
 defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
@@ -39,42 +38,43 @@ defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
 defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
 
 # SECURITY NOTE: Disabling LSQuarantine removes Gatekeeper's "unverified
-# developer" warning for downloaded apps, which is convenient but weakens a
-# real macOS security control. Disabled by default — uncomment only if needed.
+# developer" warning for downloaded apps. Disabled here — uncomment only if needed.
 # defaults write com.apple.LaunchServices LSQuarantine -bool false
 
-# Disable automatic capitalization
-defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false
+# Keep autocorrect and smart substitutions enabled
+defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool true
+defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool true
+defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool true
+defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool true
+defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool true
 
-# Disable smart dashes
-defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
+# Open new documents in tabs always
+defaults write NSGlobalDomain AppleWindowTabbingMode -string "always"
 
-# Disable automatic period substitution
-defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false
-
-# Disable smart quotes
-defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
-
-# Disable auto-correct
-defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
+# Automatically switch between light and dark mode
+defaults write NSGlobalDomain AppleInterfaceStyleSwitchesAutomatically -bool true
 
 ###############################################################################
-# Trackpad, mouse, keyboard, Bluetooth accessories, and input                 #
+# Trackpad, mouse, keyboard, and input                                        #
 ###############################################################################
 
 # Trackpad: enable tap to click for this user and for the login screen
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
 defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 
-# Enable full keyboard access for all controls
-defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
+# Trackpad and mouse speed
+defaults write NSGlobalDomain com.apple.trackpad.scaling -float 2.5
+defaults write NSGlobalDomain com.apple.mouse.scaling -float 2
+
+# Natural (Mac-style) scrolling
+defaults write NSGlobalDomain com.apple.swipescrolldirection -bool true
+
+# Enable spring-loaded folders for drag and drop
+defaults write NSGlobalDomain com.apple.springing.enabled -bool true
+defaults write NSGlobalDomain com.apple.springing.delay -float 0.5
 
 # Use scroll gesture with the Ctrl (^) modifier key to zoom
 defaults write com.apple.universalaccess closeViewScrollWheelToggle -bool true
-
-# Set a blazingly fast keyboard repeat rate
-defaults write NSGlobalDomain KeyRepeat -int 2
-defaults write NSGlobalDomain InitialKeyRepeat -int 15
 
 ###############################################################################
 # Screen                                                                      #
@@ -84,8 +84,8 @@ defaults write NSGlobalDomain InitialKeyRepeat -int 15
 defaults write com.apple.screensaver askForPassword -int 1
 defaults write com.apple.screensaver askForPasswordDelay -int 0
 
-# Save screenshots to the desktop
-defaults write com.apple.screencapture location -string "${HOME}/Desktop"
+# Save screenshots to Downloads
+defaults write com.apple.screencapture location -string "${HOME}/Downloads"
 
 # Save screenshots in PNG format
 defaults write com.apple.screencapture type -string "png"
@@ -97,30 +97,16 @@ defaults write com.apple.screencapture disable-shadow -bool true
 # Finder                                                                      #
 ###############################################################################
 
-# Show hidden files by default
-defaults write com.apple.finder AppleShowAllFiles -bool true
-
 # Show all filename extensions
 defaults write NSGlobalDomain AppleShowAllExtensions -bool true
 
-# Show status bar
-defaults write com.apple.finder ShowStatusBar -bool true
-
-# Show path bar
-defaults write com.apple.finder ShowPathbar -bool true
-
-# Display full POSIX path as Finder window title
-defaults write com.apple.finder _FXShowPosixPathInTitle -bool true
-
-# Keep folders on top when sorting by name
-defaults write com.apple.finder _FXSortFoldersFirst -bool true
+# Use column view in all Finder windows by default
+# Possible values: `icnv` (icons), `clmv` (column), `Nlsv` (list), `glyv` (gallery)
+defaults write com.apple.finder FXPreferredViewStyle -string "clmv"
 
 # Avoid creating .DS_Store files on network or USB volumes
 defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
 defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
-
-# Use list view in all Finder windows by default
-defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
 
 # Show the ~/Library folder
 chflags nohidden ~/Library
@@ -133,13 +119,19 @@ sudo chflags nohidden /Volumes
 ###############################################################################
 
 # Set the icon size of Dock items
-defaults write com.apple.dock tilesize -int 50
+defaults write com.apple.dock tilesize -int 85
 
-# Change minimize/maximize window effect
-defaults write com.apple.dock mineffect -string "scale"
+# Position Dock on the right side of the screen
+defaults write com.apple.dock orientation -string "right"
+
+# Use genie minimize/maximize window effect
+defaults write com.apple.dock mineffect -string "genie"
 
 # Minimize windows into their application's icon
 defaults write com.apple.dock minimize-to-application -bool true
+
+# Show recent applications in Dock
+defaults write com.apple.dock show-recents -bool true
 
 # Don't animate opening applications from the Dock
 defaults write com.apple.dock launchanim -bool false
@@ -150,14 +142,32 @@ defaults write com.apple.dock expose-animation-duration -float 0.1
 # Don't automatically rearrange Spaces based on most recent use
 defaults write com.apple.dock mru-spaces -bool false
 
-# Remove the auto-hiding Dock delay
-defaults write com.apple.dock autohide-delay -float 0
+# Keep the Dock always visible
+defaults write com.apple.dock autohide -bool false
 
-# Remove the animation when hiding/showing the Dock
-defaults write com.apple.dock autohide-time-modifier -float 0
+###############################################################################
+# Hot Corners                                                                 #
+# Possible values:                                                            #
+#  0: no-op    2: Mission Control    3: App windows    4: Desktop             #
+#  5: Start screen saver            6: Disable screen saver                  #
+# 10: Display sleep  11: Launchpad  12: Notification Center  13: Lock Screen  #
+###############################################################################
 
-# Automatically hide and show the Dock
-defaults write com.apple.dock autohide -bool true
+# Top-left: disabled
+defaults write com.apple.dock wvous-tl-corner -int 1
+defaults write com.apple.dock wvous-tl-modifier -int 0
+
+# Top-right: Desktop
+defaults write com.apple.dock wvous-tr-corner -int 4
+defaults write com.apple.dock wvous-tr-modifier -int 0
+
+# Bottom-left: Desktop
+defaults write com.apple.dock wvous-bl-corner -int 4
+defaults write com.apple.dock wvous-bl-modifier -int 0
+
+# Bottom-right: Start screen saver
+defaults write com.apple.dock wvous-br-corner -int 5
+defaults write com.apple.dock wvous-br-modifier -int 0
 
 ###############################################################################
 # Safari & WebKit                                                             #
@@ -182,18 +192,22 @@ defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebK
 # Only use UTF-8 in Terminal.app
 defaults write com.apple.terminal StringEncodings -array 4
 
-# Enable Secure Keyboard Entry in Terminal.app
-defaults write com.apple.terminal SecureKeyboardEntry -bool true
+# SECURITY: Secure Keyboard Entry prevents other processes from reading keystrokes.
+# Disabled here to match current system settings; re-enable if preferred.
+# defaults write com.apple.terminal SecureKeyboardEntry -bool true
 
 ###############################################################################
 # Activity Monitor                                                            #
 ###############################################################################
 
-# Show the main window when launching Activity Monitor
-defaults write com.apple.ActivityMonitor OpenMainWindow -bool true
+# Don't show the main window when launching Activity Monitor
+defaults write com.apple.ActivityMonitor OpenMainWindow -bool false
 
-# Show all processes in Activity Monitor
-defaults write com.apple.ActivityMonitor ShowCategory -int 0
+# Show current user's processes (100) in Activity Monitor
+defaults write com.apple.ActivityMonitor ShowCategory -int 100
+
+# Show CPU usage in the Activity Monitor Dock icon
+defaults write com.apple.ActivityMonitor IconType -int 5
 
 ###############################################################################
 # Developer Tools                                                             #

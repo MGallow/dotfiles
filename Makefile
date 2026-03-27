@@ -4,7 +4,7 @@
 SHELL := /bin/bash
 DOTFILES := $(shell pwd)
 
-.PHONY: help bootstrap install verify update unlink dry-run
+.PHONY: help bootstrap install verify update unlink dry-run defaults
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -27,3 +27,6 @@ unlink: ## Remove all managed dotfile symlinks (reverse of bootstrap)
 
 dry-run: ## Preview what bootstrap would do without making changes
 	@cd $(DOTFILES) && ./script/bootstrap --dry-run
+
+defaults: ## Apply macOS system preferences (manual — not run by install)
+	@cd $(DOTFILES) && ./macos/set-defaults.sh
