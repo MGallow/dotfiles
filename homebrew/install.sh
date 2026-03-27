@@ -53,7 +53,9 @@ else
     done < <(grep '^cask ' "$DOTFILES/Brewfile")
 
     HOMEBREW_BUNDLE_CASK_SKIP="$SKIP_CASKS" \
-        arch -arm64 brew bundle install --file="$DOTFILES/Brewfile"
+        arch -arm64 brew bundle install --file="$DOTFILES/Brewfile" || {
+            echo "  [WARN] brew bundle reported failures — continuing anyway"
+        }
 fi
 
 arch -arm64 brew cleanup
