@@ -30,7 +30,10 @@ source $ZSH/oh-my-zsh.sh
 for config_file ($DOTFILES/**/*.zsh) source $config_file
 
 # Python environment settings
-if [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
+# Check Homebrew Cask path first (Apple Silicon), fall back to direct install path
+if [ -f "/opt/homebrew/Caskroom/miniconda/base/etc/profile.d/conda.sh" ]; then
+    source "/opt/homebrew/Caskroom/miniconda/base/etc/profile.d/conda.sh"
+elif [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
     source "$HOME/miniconda3/etc/profile.d/conda.sh"
 fi
 

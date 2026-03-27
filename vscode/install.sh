@@ -1,16 +1,8 @@
 #!/bin/bash
 
-# Make sure we have the VS Code directories
-mkdir -p "$HOME/Library/Application Support/Code/User"
-mkdir -p "$HOME/Library/Application Support/Code - Insiders/User"
-
-# Symlink settings and keybindings for VS Code Insiders (primary)
-ln -sf "$DOTFILES/vscode/settings.json" "$HOME/Library/Application Support/Code - Insiders/User/settings.json"
-ln -sf "$DOTFILES/vscode/keybindings.json" "$HOME/Library/Application Support/Code - Insiders/User/keybindings.json"
-
-# Symlink settings and keybindings for regular VS Code (secondary)
-ln -sf "$DOTFILES/vscode/settings.json" "$HOME/Library/Application Support/Code/User/settings.json"
-ln -sf "$DOTFILES/vscode/keybindings.json" "$HOME/Library/Application Support/Code/User/keybindings.json"
+# Settings and keybindings are managed by VS Code Settings Sync — not symlinked here.
+# vscode/settings.json and vscode/keybindings.json in this repo serve as a reference
+# snapshot only. To apply them manually, copy them into place; do not symlink.
 
 # Install extensions — VS Code Insiders is primary
 if command -v code-insiders &>/dev/null; then

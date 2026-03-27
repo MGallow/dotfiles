@@ -1,0 +1,7 @@
+[user]
+    name = Matt Galloway
+    email = mgalloway42024@gmail.com
+[github]
+    user = Matt Galloway
+[credential]
+    helper = osxkeychain

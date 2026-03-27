@@ -19,12 +19,9 @@ if ! command -v conda &>/dev/null; then
     fi
 fi
 
-# Initialize conda for zsh (only if not already initialized)
-CONDA_BIN="/opt/homebrew/Caskroom/miniconda/base/bin/conda"
-if [ -f "$CONDA_BIN" ] && ! grep -q "conda initialize" "$HOME/.zshrc" 2>/dev/null; then
-    eval "$($CONDA_BIN shell.zsh hook)"
-    conda init zsh
-fi
+# conda initialization is handled in zsh/zshrc.symlink by directly sourcing
+# conda.sh — no need for `conda init zsh`, which would write into the symlinked
+# repo file and pollute git history with a machine-generated block.
 
 # ── uv ────────────────────────────────────────────────────────────────────────
 # uv is the fast Python package installer used inside conda environments.
@@ -42,7 +39,8 @@ echo "  uv: $(uv --version 2>/dev/null || echo 'installed')"
 # ── Base conda environment ────────────────────────────────────────────────────
 # Written to $HOME (outside the repo) so it is never accidentally committed.
 BASE_ENV_YML="$HOME/.conda-base-environment.yml"
-cat > "$BASE_ENV_YML" <<'ENVEOF'
+if [ ! -f "$BASE_ENV_YML" ]; then
+    cat > "$BASE_ENV_YML" <<'ENVEOF'
 name: base
 channels:
   - conda-forge
@@ -60,6 +58,9 @@ dependencies:
   - pre-commit
   - python-dotenv
 ENVEOF
+else
+    echo "  Skipping ~/.conda-base-environment.yml (already exists — edit manually to update)"
+fi
 
 echo "  Updating base conda environment (this may take a moment)..."
 conda env update -f "$BASE_ENV_YML" --prune 2>/dev/null || true
