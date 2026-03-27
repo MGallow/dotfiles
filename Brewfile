@@ -61,7 +61,7 @@ brew "azure/azd/azd"    # Azure Developer CLI
 cask "1password"                    # GUI password manager
 cask "1password-cli"                # Command-line helper for the 1Password password manager
 # adobe-lightroom removed — no longer available as a Homebrew cask; install via Adobe Creative Cloud
-cask "bettersnaptool"               # Window snapping and management tool
+# bettersnaptool removed — Mac App Store only, no longer available as a Homebrew cask
 cask "caffeine"                     # Prevents Mac from sleeping
 cask "chatgpt"                      # OpenAI ChatGPT desktop app
 cask "claude"                       # Anthropic Claude desktop app
@@ -77,7 +77,7 @@ cask "nordvpn"                      # VPN client
 cask "rstudio"                      # IDE for R programming
 cask "sonos"                        # Sonos controller app
 cask "virtualbox"                   # VM platform
-cask "visual-studio-code-insiders"  # Primary editor
+cask "visual-studio-code@insiders"  # Primary editor
 cask "visual-studio-code"           # Secondary editor
 cask "warp"                         # Terminal with AI integration
 cask "zoom"                         # Video conferencing
@@ -104,7 +104,7 @@ vscode "mechatroner.rainbow-csv"
 vscode "ms-azure-devops.azure-pipelines"
 vscode "ms-azuretools.azure-dev"
 vscode "ms-azuretools.vscode-azure-github-copilot"
-vscode "ms-azuretools.vscode-azure-mcp-server"
+# ms-azuretools.vscode-azure-mcp-server removed — incompatible with VS Code 1.98.x
 vscode "ms-azuretools.vscode-azureappservice"
 vscode "ms-azuretools.vscode-azurecontainerapps"
 vscode "ms-azuretools.vscode-azurefunctions"
@@ -121,7 +121,7 @@ vscode "ms-mssql.data-workspace-vscode"
 vscode "ms-mssql.mssql"
 vscode "ms-mssql.sql-bindings-vscode"
 vscode "ms-mssql.sql-database-projects-vscode"
-vscode "ms-ossdata.vscode-postgresql"
+# ms-ossdata.vscode-postgresql removed — no longer in marketplace
 vscode "ms-python.anaconda-extension-pack"
 vscode "ms-python.debugpy"
 vscode "ms-python.flake8"

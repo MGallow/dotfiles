@@ -5,13 +5,14 @@
 set -e
 
 cd "$(dirname "$0")"/..
+DOTFILES="${DOTFILES:-$(pwd)}"
 
 info()    { printf "\r  [ \033[00;34m..\033[0m ] %s\n" "$1"; }
 success() { printf "\r\033[2K  [ \033[00;32mOK\033[0m ] %s\n" "$1"; }
 
 # ── 1. Homebrew ──────────────────────────────────────────────────────────────
 info "Installing Homebrew dependencies"
-"$HOME/.dotfiles/homebrew/install.sh" 2>&1
+"${DOTFILES:-$HOME/.dotfiles}/homebrew/install.sh" 2>&1
 success "Homebrew dependencies installed"
 
 # ── 2. Oh My Zsh + plugins ───────────────────────────────────────────────────
