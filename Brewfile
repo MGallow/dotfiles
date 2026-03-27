@@ -60,7 +60,7 @@ brew "azure/azd/azd"    # Azure Developer CLI
 # Applications
 cask "1password"                    # GUI password manager
 cask "1password-cli"                # Command-line helper for the 1Password password manager
-cask "adobe-lightroom"              # Adobe Lightroom photo editor
+# adobe-lightroom removed — no longer available as a Homebrew cask; install via Adobe Creative Cloud
 cask "bettersnaptool"               # Window snapping and management tool
 cask "caffeine"                     # Prevents Mac from sleeping
 cask "chatgpt"                      # OpenAI ChatGPT desktop app
