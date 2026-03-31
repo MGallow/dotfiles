@@ -2,6 +2,8 @@
 # Resolve from the actual location of this file (handles repos not at ~/.dotfiles)
 export DOTFILES="${DOTFILES:-$(dirname "$(dirname "$(readlink -f "$HOME/.zshrc")")")}"
 
+# Github access token
+
 # Path to your oh-my-zsh installation
 export ZSH=$HOME/.oh-my-zsh
 

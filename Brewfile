@@ -8,6 +8,7 @@ brew "tmux"
 brew "vim"
 brew "zsh"
 brew "node"             # Required for Claude Code, Gemini CLI, and Codex CLI (all installed via npm)
+brew "bun"              # Fast JavaScript runtime and package manager
 brew "python"
 
 # Python toolchain
