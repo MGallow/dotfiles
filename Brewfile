@@ -66,6 +66,7 @@ cask "1password-cli"                # Command-line helper for the 1Password pass
 cask "caffeine"                     # Prevents Mac from sleeping
 cask "chatgpt"                      # OpenAI ChatGPT desktop app
 cask "claude"                       # Anthropic Claude desktop app
+cask "ollama"                       # Local large language model runner
 cask "cyberduck"                    # FTP, SFTP, WebDAV, and cloud storage browser
 cask "docker"                       # Container platform
 cask "firefox"                      # Web browser
