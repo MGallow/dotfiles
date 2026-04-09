@@ -19,11 +19,7 @@ displayUsageAndExit() {
     echo "  -e, --edit    Open dotfiles directory for editing in VS Code"
     echo "  -h, --help    Show this help message and exit"
     echo "  update        Update packages, AI tools, and pkg managers"
-    echo "  sync          Run a one-off sync with remote now"
-    echo "  sync-on       Enable automatic background sync (fswatch + launchd)"
-    echo "  sync-off      Disable automatic background sync"
-    echo "  sync-status   Show whether auto-sync is running"
-    echo "  sync-log      Tail the sync log"
+    echo "  sync          Sync dotfiles with remote (pull, commit, push)"
     exit
 }
 
@@ -43,22 +39,101 @@ while test $# -gt 0; do
             exit
             ;;
         "sync-on")
-            # Ensure fswatch is installed
-            if ! command -v fswatch &>/dev/null; then
-                echo "› fswatch not found — installing via Homebrew…"
-                brew install fswatch
-            fi
-            plist_src="$dotfilesDirectory/git/com.dotfiles.sync.plist"
             plist_dst="$HOME/Library/LaunchAgents/com.dotfiles.sync.plist"
-            # Render placeholders
-            sed -e "s|DOTFILES_PLACEHOLDER|$dotfilesDirectory|g" \
-                -e "s|HOME_PLACEHOLDER|$HOME|g" \
-                "$plist_src" > "$plist_dst"
+            sync_script="$HOME/.local/bin/dotfiles-sync.sh"
+            mkdir -p "$HOME/.local/bin"
+
+            # Generate sync script at runtime from terminal context
+            # (avoids macOS provenance restrictions on repo files)
+            cat > "$sync_script" <<'SYNCEOF'
+#!/usr/bin/env bash
+set -euo pipefail
+LOGFILE="$HOME/Library/Logs/dotfiles-sync.log"
+BRANCH="main"
+REMOTE="origin"
+mkdir -p "$(dirname "$LOGFILE")"
+log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOGFILE"; }
+cd "$DOTFILES" || { log "ERROR: Cannot cd to $DOTFILES"; exit 1; }
+git rev-parse --is-inside-work-tree &>/dev/null || { log "ERROR: Not a git repo"; exit 1; }
+current_branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+[[ "$current_branch" == "$BRANCH" ]] || { log "SKIP: On branch '$current_branch'"; exit 0; }
+[[ ! -d .git/rebase-merge && ! -d .git/rebase-apply && ! -f .git/MERGE_HEAD ]] || { log "SKIP: Rebase/merge in progress"; exit 0; }
+host github.com &>/dev/null || { log "SKIP: Offline"; exit 0; }
+log "Starting sync..."
+git fetch "$REMOTE" "$BRANCH" --quiet 2>/dev/null || { log "SKIP: Fetch failed"; exit 0; }
+local_sha=$(git rev-parse HEAD)
+remote_sha=$(git rev-parse "$REMOTE/$BRANCH")
+base_sha=$(git merge-base HEAD "$REMOTE/$BRANCH")
+if [[ "$local_sha" != "$remote_sha" && "$local_sha" == "$base_sha" ]]; then
+    git merge --ff-only "$REMOTE/$BRANCH" --quiet 2>/dev/null && log "PULLED: Fast-forwarded" || { log "SKIP: FF merge failed"; exit 0; }
+elif [[ "$local_sha" != "$remote_sha" && "$remote_sha" != "$base_sha" && "$local_sha" != "$base_sha" ]]; then
+    log "SKIP: Diverged — manual merge needed"; exit 0
+fi
+git add -A
+if ! git diff --cached --quiet; then
+    changed=$(git diff --cached --name-only)
+    count=$(echo "$changed" | wc -l | tr -d ' ')
+    first=$(echo "$changed" | head -1)
+    [[ "$count" -eq 1 ]] && msg="auto-sync: update $first" || msg="auto-sync: update $first (+$((count - 1)) more)"
+    git commit -m "$msg" --quiet
+    log "COMMITTED: $msg"
+fi
+local_sha=$(git rev-parse HEAD)
+remote_sha=$(git rev-parse "$REMOTE/$BRANCH")
+if [[ "$local_sha" != "$remote_sha" ]]; then
+    git push "$REMOTE" "$BRANCH" --quiet 2>/dev/null && log "PUSHED: to $REMOTE/$BRANCH" || log "ERROR: Push failed"
+else
+    log "OK: Already in sync"
+fi
+SYNCEOF
+            chmod +x "$sync_script"
+
+            # Generate plist with WatchPaths + timer
+            cat > "$plist_dst" <<PLISTEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.dotfiles.sync</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>$sync_script</string>
+    </array>
+    <key>WatchPaths</key>
+    <array>
+        <string>$dotfilesDirectory</string>
+    </array>
+    <key>StartInterval</key>
+    <integer>300</integer>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>HOME</key>
+        <string>$HOME</string>
+        <key>DOTFILES</key>
+        <string>$dotfilesDirectory</string>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>$HOME/Library/Logs/dotfiles-sync-stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>$HOME/Library/Logs/dotfiles-sync-stderr.log</string>
+    <key>Nice</key>
+    <integer>10</integer>
+</dict>
+</plist>
+PLISTEOF
             launchctl unload "$plist_dst" 2>/dev/null || true
             launchctl load "$plist_dst"
-            echo "✓ Auto-sync enabled (fswatch — syncs within seconds of file changes)"
-            echo "  Also pulls from remote every 5 min"
+            echo "✓ Auto-sync enabled (launchd WatchPaths + 5-min remote poll)"
+            echo "  Syncs on local file changes and pulls remote every 5 min"
             echo "  Plist: $plist_dst"
+            echo "  Script: $sync_script"
             echo "  Log:   ~/Library/Logs/dotfiles-sync.log"
             exit
             ;;
@@ -75,8 +150,7 @@ while test $# -gt 0; do
             ;;
         "sync-status")
             if launchctl list com.dotfiles.sync &>/dev/null; then
-                pid=$(launchctl list com.dotfiles.sync 2>/dev/null | awk 'NR==2{print $1}')
-                echo "✓ Auto-sync is ACTIVE (fswatch watcher${pid:+, pid $pid})"
+                echo "✓ Auto-sync is ACTIVE (launchd WatchPaths + timer)"
                 echo "  Last 5 log entries:"
                 tail -5 "$HOME/Library/Logs/dotfiles-sync.log" 2>/dev/null || echo "  (no log yet)"
             else

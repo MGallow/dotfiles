@@ -4,7 +4,7 @@
 SHELL := /bin/bash
 DOTFILES := $(shell pwd)
 
-.PHONY: help bootstrap install verify update unlink dry-run defaults sync sync-on sync-off sync-status sync-log
+.PHONY: help bootstrap install verify update unlink dry-run defaults sync
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -31,17 +31,5 @@ dry-run: ## Preview what bootstrap would do without making changes
 defaults: ## Apply macOS system preferences (manual — not run by install)
 	@cd $(DOTFILES) && ./macos/set-defaults.sh
 
-sync: ## Run a one-off sync with remote now
+sync: ## Sync dotfiles with remote (pull, commit, push)
 	@cd $(DOTFILES) && ./bin/dot sync
-
-sync-on: ## Enable automatic background sync (fswatch + launchd)
-	@cd $(DOTFILES) && ./bin/dot sync-on
-
-sync-off: ## Disable automatic background sync
-	@cd $(DOTFILES) && ./bin/dot sync-off
-
-sync-status: ## Show whether auto-sync is running
-	@cd $(DOTFILES) && ./bin/dot sync-status
-
-sync-log: ## Tail the sync log
-	@cd $(DOTFILES) && ./bin/dot sync-log
