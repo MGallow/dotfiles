@@ -40,5 +40,8 @@ alias update="brew update; brew upgrade; brew cleanup; npm update -g"
 # Recursively delete `.DS_Store` files
 alias cleanup="find . -type f -name '.DS_Store' -ls -delete"
 
+# VS Code — always use Insiders
+alias code="code-insiders"
+
 # Reload shell (i.e. invoke as a login shell)
 alias reload="exec ${SHELL} -l"

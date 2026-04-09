@@ -19,6 +19,11 @@ displayUsageAndExit() {
     echo "  -e, --edit    Open dotfiles directory for editing in VS Code"
     echo "  -h, --help    Show this help message and exit"
     echo "  update        Update packages, AI tools, and pkg managers"
+    echo "  sync          Run a one-off sync with remote now"
+    echo "  sync-on       Enable automatic background sync (every 5 min)"
+    echo "  sync-off      Disable automatic background sync"
+    echo "  sync-status   Show whether auto-sync is running"
+    echo "  sync-log      Tail the sync log"
     exit
 }
 
@@ -29,6 +34,51 @@ while test $# -gt 0; do
             ;;
         "-e"|"--edit")
             exec code "$dotfilesDirectory"
+            exit
+            ;;
+        "sync")
+            echo "› Running one-off dotfiles sync…"
+            bash "$dotfilesDirectory/git/sync.sh"
+            echo "✓ Sync complete — check ~/Library/Logs/dotfiles-sync.log"
+            exit
+            ;;
+        "sync-on")
+            plist_src="$dotfilesDirectory/git/com.dotfiles.sync.plist"
+            plist_dst="$HOME/Library/LaunchAgents/com.dotfiles.sync.plist"
+            # Render placeholders
+            sed -e "s|DOTFILES_PLACEHOLDER|$dotfilesDirectory|g" \
+                -e "s|HOME_PLACEHOLDER|$HOME|g" \
+                "$plist_src" > "$plist_dst"
+            launchctl unload "$plist_dst" 2>/dev/null || true
+            launchctl load "$plist_dst"
+            echo "✓ Auto-sync enabled (every 5 min)"
+            echo "  Plist: $plist_dst"
+            echo "  Log:   ~/Library/Logs/dotfiles-sync.log"
+            exit
+            ;;
+        "sync-off")
+            plist_dst="$HOME/Library/LaunchAgents/com.dotfiles.sync.plist"
+            if [ -f "$plist_dst" ]; then
+                launchctl unload "$plist_dst" 2>/dev/null || true
+                rm -f "$plist_dst"
+                echo "✓ Auto-sync disabled"
+            else
+                echo "Auto-sync is not enabled"
+            fi
+            exit
+            ;;
+        "sync-status")
+            if launchctl list com.dotfiles.sync &>/dev/null; then
+                echo "✓ Auto-sync is ACTIVE"
+                echo "  Last 5 log entries:"
+                tail -5 "$HOME/Library/Logs/dotfiles-sync.log" 2>/dev/null || echo "  (no log yet)"
+            else
+                echo "✗ Auto-sync is NOT running"
+            fi
+            exit
+            ;;
+        "sync-log")
+            tail -30 "$HOME/Library/Logs/dotfiles-sync.log" 2>/dev/null || echo "No sync log found"
             exit
             ;;
         "update")
