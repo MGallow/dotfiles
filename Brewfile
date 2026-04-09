@@ -31,6 +31,7 @@ brew "pandoc"           # Swiss-army knife of markup format conversion
 brew "gh"               # GitHub CLI (also used for GitHub Copilot CLI extension)
 brew "fzf"              # Fuzzy finder
 brew "ripgrep"          # Fast search tool
+brew "fswatch"          # File change monitor (used by dotfiles auto-sync)
 
 # Data & analytics
 brew "r"                # GNU R statistical computing language

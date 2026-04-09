@@ -34,7 +34,7 @@ defaults: ## Apply macOS system preferences (manual — not run by install)
 sync: ## Run a one-off sync with remote now
 	@cd $(DOTFILES) && ./bin/dot sync
 
-sync-on: ## Enable automatic background sync (every 5 min)
+sync-on: ## Enable automatic background sync (fswatch + launchd)
 	@cd $(DOTFILES) && ./bin/dot sync-on
 
 sync-off: ## Disable automatic background sync

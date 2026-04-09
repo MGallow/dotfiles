@@ -20,7 +20,7 @@ displayUsageAndExit() {
     echo "  -h, --help    Show this help message and exit"
     echo "  update        Update packages, AI tools, and pkg managers"
     echo "  sync          Run a one-off sync with remote now"
-    echo "  sync-on       Enable automatic background sync (every 5 min)"
+    echo "  sync-on       Enable automatic background sync (fswatch + launchd)"
     echo "  sync-off      Disable automatic background sync"
     echo "  sync-status   Show whether auto-sync is running"
     echo "  sync-log      Tail the sync log"
@@ -43,6 +43,11 @@ while test $# -gt 0; do
             exit
             ;;
         "sync-on")
+            # Ensure fswatch is installed
+            if ! command -v fswatch &>/dev/null; then
+                echo "› fswatch not found — installing via Homebrew…"
+                brew install fswatch
+            fi
             plist_src="$dotfilesDirectory/git/com.dotfiles.sync.plist"
             plist_dst="$HOME/Library/LaunchAgents/com.dotfiles.sync.plist"
             # Render placeholders
@@ -51,7 +56,8 @@ while test $# -gt 0; do
                 "$plist_src" > "$plist_dst"
             launchctl unload "$plist_dst" 2>/dev/null || true
             launchctl load "$plist_dst"
-            echo "✓ Auto-sync enabled (every 5 min)"
+            echo "✓ Auto-sync enabled (fswatch — syncs within seconds of file changes)"
+            echo "  Also pulls from remote every 5 min"
             echo "  Plist: $plist_dst"
             echo "  Log:   ~/Library/Logs/dotfiles-sync.log"
             exit
@@ -69,11 +75,13 @@ while test $# -gt 0; do
             ;;
         "sync-status")
             if launchctl list com.dotfiles.sync &>/dev/null; then
-                echo "✓ Auto-sync is ACTIVE"
+                pid=$(launchctl list com.dotfiles.sync 2>/dev/null | awk 'NR==2{print $1}')
+                echo "✓ Auto-sync is ACTIVE (fswatch watcher${pid:+, pid $pid})"
                 echo "  Last 5 log entries:"
                 tail -5 "$HOME/Library/Logs/dotfiles-sync.log" 2>/dev/null || echo "  (no log yet)"
             else
                 echo "✗ Auto-sync is NOT running"
+                echo "  Enable with: dot sync-on"
             fi
             exit
             ;;

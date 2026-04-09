@@ -3,7 +3,8 @@
 # git/sync.sh — Auto-sync dotfiles with remote
 #
 # Pulls remote changes, auto-commits any local modifications, and pushes.
-# Designed to be run by launchd every few minutes for hands-free dotfile sync.
+# Called by git/sync-watch.sh (fswatch) on file changes and periodically
+# for remote pulls. Can also be run standalone: `dot sync`
 #
 # Safety guarantees:
 #   • Never force-pushes
