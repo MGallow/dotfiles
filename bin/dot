@@ -33,9 +33,9 @@ while test $# -gt 0; do
             exit
             ;;
         "sync")
-            echo "› Running one-off dotfiles sync…"
+            echo "› Syncing dotfiles with remote…"
             bash "$dotfilesDirectory/git/sync.sh"
-            echo "✓ Sync complete — check ~/Library/Logs/dotfiles-sync.log"
+            echo "✓ Sync complete"
             exit
             ;;
         "sync-on")
