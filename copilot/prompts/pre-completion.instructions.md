@@ -24,20 +24,9 @@ until the full pipeline passes cleanly.
    integration test suite, run it (e.g., `uv run pytest -m smoke -v`)
 6. **Pre-commit hooks** - if `.pre-commit-config.yaml` exists:
    `pre-commit run --all-files` (all hooks must pass)
-7. **Auto-commit** (only if files were changed during the session):
-   ```bash
-   if ! git diff --quiet || ! git diff --cached --quiet; then
-       git add -A
-       CHANGED_FILES=$(git diff --cached --name-only)
-       FILE_COUNT=$(echo "$CHANGED_FILES" | wc -l | tr -d ' ')
-       SHORT_LIST=$(echo "$CHANGED_FILES" | head -5 | xargs -I{} basename {} | paste -sd ', ' -)
-       if [[ "$FILE_COUNT" -le 5 ]]; then
-           git commit -m "auto: update ${SHORT_LIST}"
-       else
-           git commit -m "auto: update ${SHORT_LIST} (+$((FILE_COUNT - 5)) more)"
-       fi
-   fi
-   ```
+7. **Auto-commit**: If any files were modified during the session,
+   stage and commit them with a concise, descriptive commit message
+   summarizing the changes.
 
 ## Rules
 
