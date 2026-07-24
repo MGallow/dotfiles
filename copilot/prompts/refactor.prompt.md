@@ -1,6 +1,7 @@
 ---
 description: "Refactor code for quality without changing behavior. Applies modern Python patterns, improves naming, extracts functions, and verifies with tests."
 agent: "agent"
+tools: [read, search, edit, execute]
 argument-hint: "Specify what to refactor (e.g., 'clean up the data processing in background_refresh.py')"
 ---
 

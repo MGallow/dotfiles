@@ -1,6 +1,6 @@
 ---
 description: "Review code for quality, type safety, and style issues"
-agent: "agent"
+agent: "Reviewer"
 argument-hint: "Specify file(s) or describe what to review"
 ---
 

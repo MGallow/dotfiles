@@ -1,6 +1,6 @@
 ---
 description: "Write comprehensive tests for specified code. Analyzes the module, identifies test cases, and generates a complete test file."
-agent: "agent"
+agent: "Tester"
 argument-hint: "Specify the module/function to test (e.g., 'tce_inspector_api/services/inspection.py')"
 ---
 
