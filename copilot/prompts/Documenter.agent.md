@@ -2,7 +2,6 @@
 description: "Write and update documentation. Use for docstrings, READMEs, architecture docs, API docs, inline documentation, and code comments. Can read code, edit documentation files, and verify linting."
 name: "Documenter"
 tools: [read, search, edit, execute, web]
-model: ['Claude Opus 4.6 (copilot)', 'Claude Sonnet 4 (copilot)']
 argument-hint: "Specify what to document (e.g., 'add docstrings to the engine module' or 'write a README for the MCP server')"
 ---
 

@@ -2,7 +2,6 @@
 description: "Fix failing tests, debug errors, and diagnose issues. Use when tests fail, exceptions occur, or something is broken. Can read code, run tests, and make targeted fixes."
 name: "Fixer"
 tools: [read, search, edit, execute]
-model: ['Claude Opus 4.6 (copilot)', 'Claude Sonnet 4 (copilot)']
 argument-hint: "Describe the error or paste the failing output (e.g., 'tests are failing in test_services.py' or 'TypeError in background_refresh')"
 ---
 

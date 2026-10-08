@@ -2,7 +2,6 @@
 description: "Plan and design before implementing. Use for architecture decisions, exploring approaches, clarifying requirements, and creating implementation plans. Read-only research that produces an actionable plan."
 name: "Planner"
 tools: [read, search, web, todo]
-model: ['Claude Opus 4.6 (copilot)', 'Claude Sonnet 4 (copilot)']
 argument-hint: "Describe the feature or change to plan (e.g., 'add caching to the API layer' or 'plan migration from pandas to polars')"
 ---
 

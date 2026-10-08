@@ -2,7 +2,6 @@
 description: "Read-only code reviewer. Use for PR reviews, code quality audits, security checks, and architecture analysis. Will NOT make changes."
 name: "Reviewer"
 tools: [read, search, execute, web]
-model: ['Claude Opus 4.6 (copilot)', 'Claude Sonnet 4 (copilot)']
 argument-hint: "Describe what to review (e.g., 'review the changes in the last commit' or 'audit security of auth module')"
 ---
 

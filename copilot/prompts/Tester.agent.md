@@ -2,7 +2,6 @@
 description: "Write comprehensive tests for code. Use when adding test coverage, testing new features, testing edge cases, or generating test files. Can read code, create test files, and run tests to verify."
 name: "Tester"
 tools: [read, search, edit, execute]
-model: ['Claude Opus 4.6 (copilot)', 'Claude Sonnet 4 (copilot)']
 argument-hint: "Specify what to test (e.g., 'write tests for services/inspection.py' or 'add edge case tests for the validation module')"
 ---
 

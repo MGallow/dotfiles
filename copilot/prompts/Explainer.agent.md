@@ -2,7 +2,6 @@
 description: "Explain code, architecture, and design decisions. Use for onboarding, learning unfamiliar codebases, understanding complex logic, or documenting how things work. Read-only research agent."
 name: "Explainer"
 tools: [read, search, web]
-model: ['Claude Opus 4.6 (copilot)', 'Claude Sonnet 4 (copilot)']
 argument-hint: "What do you want explained? (e.g., 'how does the background refresh system work?' or 'trace the request flow from API to database')"
 ---
 
