@@ -53,6 +53,10 @@ fi
 
 echo "› Linking OpenAI Codex user configuration..."
 mkdir -p "$HOME/.codex"
+if [[ ! -e "$DOTFILES/openai/config.toml" && ! -L "$DOTFILES/openai/config.toml" ]]; then
+    cp "$DOTFILES/openai/config.toml.example" "$DOTFILES/openai/config.toml"
+    echo "  Created private config.toml from the portable example"
+fi
 link_managed_path "$DOTFILES/openai/config.toml" "$HOME/.codex/config.toml"
 link_managed_path "$DOTFILES/openai/AGENTS.md" "$HOME/.codex/AGENTS.md"
 mkdir -p "$HOME/.codex/agents"

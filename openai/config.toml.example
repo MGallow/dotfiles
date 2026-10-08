@@ -1,0 +1,3 @@
+# Portable starting point; copy to config.toml for private machine settings.
+# Keep package registry URLs, service endpoints, credentials, project trust,
+# and machine-specific paths in the ignored config.toml only.

@@ -67,6 +67,23 @@ yarn-error.log*
 *.key
 *.crt
 .netrc
+.env.*
+!.env.example
+.npmrc
+.yarnrc
+.yarnrc.yml
+.pypirc
+pip.conf
+pip.ini
+uv.toml
+.condarc
+mcp.json
+.mcp.json
+auth.json
+credentials.json
+credentials.toml
+*.backup
+*.backup.*
 
 # Application specific
 .vscode-insiders/
