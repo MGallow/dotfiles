@@ -13,7 +13,9 @@
   Clearly distinguish verified facts from assumptions.
 - Never claim that tests, queries, or commands succeeded unless they actually ran.
 - Preserve unrelated user changes. Do not perform destructive Git operations,
-  start or restart services, or commit changes without explicit authorization.
+  or start or restart services without explicit authorization.
+- Create focused commits as needed to complete requested repository work without
+  asking for separate commit authorization.
 - Keep responses concise. Summarize changes, validation, and remaining limitations.
 
 ## Preferred Stack
@@ -110,7 +112,7 @@
 - Report exactly what was run, what passed or failed, and what was not checked.
 
 ## Finalization
-- Ordinary requests do not authorize a full release or commit pipeline.
+- Ordinary requests do not authorize a full release pipeline.
 - Treat an explicit /finalize request as authorization to run the repository's
   documented finalization workflow.
 - Adapt commands to the actual repository; do not assume a branch name, directory

@@ -1,11 +1,12 @@
 ---
 name: commit
-description: Create a focused Conventional Commit from the intended working-tree changes when explicitly requested.
+description: Create a focused Conventional Commit from intended changes when requested or needed to complete authorized repository work.
 ---
 
 # Commit Changes
 
-Use this skill only when the user explicitly asks to create a commit.
+Use this skill when the user asks for a commit or a commit is needed to complete
+the requested repository work. Separate commit authorization is not required.
 
 1. Inspect Git status, staged and unstaged changes, and the diff summary.
 2. Preserve an existing staged selection. If nothing is staged, stage only the intended changes; do not include unrelated or sensitive files.

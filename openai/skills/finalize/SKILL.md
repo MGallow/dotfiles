@@ -12,7 +12,7 @@ Use this skill only when the user explicitly asks to finalize, validate, release
 3. Re-run affected checks if formatting or hooks modify files.
 4. Use bounded retries for fixable failures and report unresolved failures.
 5. Sync from upstream only when explicitly requested and after discovering the actual remote and branch.
-6. Commit only when explicitly requested, following the commit workflow.
+6. Create focused commits within the requested scope, following the commit workflow; separate commit authorization is not required.
 7. Report skipped checks and the reason for each skip.
 
 Do not assume a package manager, branch name, test marker, or notification mechanism.
