@@ -1,3 +1,14 @@
-# Portable starting point; copy to config.toml for private machine settings.
+# Portable preferences synced from ~/.codex/config.toml.
+# Copy to config.toml for private machine settings. The installer preserves
+# an existing config; updating this example does not change a live setup.
 # Keep package registry URLs, service endpoints, credentials, project trust,
 # and machine-specific paths in the ignored config.toml only.
+
+model = "gpt-6.1-sol"
+model_reasoning_effort = "medium"
+service_tier = "default"
+
+[features]
+js_repl = false
+memories = true
+local_thread_store_compression = true

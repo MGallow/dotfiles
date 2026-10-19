@@ -4,6 +4,12 @@ This topic mirrors portable user-level Copilot behavior through documented Codex
 
 The user's `config.toml` is private and ignored by Git. It may contain model preferences, desktop settings, MCP registrations, corporate service and package registry URLs, project trust, and machine-specific paths. The installer preserves it and creates it from the sanitized `config.toml.example` only when missing.
 
+The tracked example mirrors the current portable model, reasoning effort, service
+tier, and selected feature preferences. It excludes notification commands, project
+trust entries, marketplace and plugin state, MCP registrations, desktop settings,
+and memory storage configuration. Updating the example does not overwrite an
+existing private configuration.
+
 ## Managed destinations
 
 - `config.toml` → `~/.codex/config.toml`

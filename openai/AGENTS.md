@@ -7,8 +7,8 @@
 - Make focused, minimal changes. Preserve existing behavior unless a behavior
   change is explicitly requested.
 - Prefer reusable, modular code without unnecessary abstractions.
-- Act on clear requests. Ask questions only when ambiguity materially affects
-  correctness, scope, architecture, or safety.
+- Act on clear requests and follow the autonomy rules below when clarification
+  might be needed.
 - Ground conclusions in inspected code, diagnostics, runtime evidence, or tests.
   Clearly distinguish verified facts from assumptions.
 - Never claim that tests, queries, or commands succeeded unless they actually ran.
@@ -17,6 +17,31 @@
 - Create focused commits as needed to complete requested repository work without
   asking for separate commit authorization.
 - Keep responses concise. Summarize changes, validation, and remaining limitations.
+
+## Autonomy by Default
+- Treat requests for action as authorization to carry the work through completion
+  within the requested scope. Do not stop at a plan or an offer to proceed.
+- When recommending an approach, proceed with it without asking for confirmation
+  unless one of the interruption conditions below applies.
+- Make reasonable technical decisions independently using repository conventions
+  and available evidence. Resolve routine ambiguity with sensible assumptions,
+  and state material assumptions in the final report.
+- Implement the solution, run relevant tests and configured lint/type checks,
+  and fix failures caused by the changes. Report any validation that is unavailable.
+- Continue independently through routine obstacles and complete useful work that
+  does not depend on a blocked step.
+- Interrupt the user only for a critical decision that cannot reasonably be
+  inferred, required credentials that are unavailable, or a potentially
+  destructive action that has not already been explicitly authorized.
+- Critical decisions include unresolved choices that materially change the user's
+  intended outcome, scope, architecture, or safety and lack a reasonable default.
+- Keep progress updates informational; do not turn routine implementation choices
+  or recommendations into approval requests. Do not ask again for authorization
+  already provided for the same action and scope.
+- Preserve the explicit authorization requirements elsewhere in this file for
+  destructive operations, service lifecycle changes, releases, and
+  protected query logic. Leave unrequested restricted actions out of scope;
+  ask only if they are necessary to complete the task.
 
 ## Preferred Stack
 - Python 3.11+, managed with uv.
